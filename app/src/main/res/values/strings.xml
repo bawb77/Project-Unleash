@@ -15,9 +15,10 @@
     <string name="p3">Player 3</string>
     <string name="p4">Player 4</string>
     <string name="start">Start Game</string>
+    <string name="htp">Hold To Play</string>
     <string name="title_activity_play">Play</string>
     <string name="refresh">Refresh</string>
-    <string name="empty"> </string>
+    <string name="empty"></string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="client_text">This device will act as a client. Click on Gallery button to pick a local(stored) file</string>
@@ -28,5 +29,6 @@
     <string name="label_peers">PEERS</string>
     <string name="tv_score">Power: </string>
     <string name="title_activity_tutorial">Tutorial</string>
+    <string name="title_activity_join">Join</string>
 
 </resources>

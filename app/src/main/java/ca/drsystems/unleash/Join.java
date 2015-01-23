@@ -18,6 +18,8 @@ public class Join extends ActionBarActivity {
     private final IntentFilter intentFilter = new IntentFilter();
     Channel mChannel;
     WifiP2pManager mManager;
+    WifiDirectBroadcastReceiver receiver;
+    private boolean isWifiP2pEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,15 @@ public class Join extends ActionBarActivity {
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
+        registerReceiver(receiver, intentFilter);
+        Log.v("P2P", "WifiDirectBroadcastReceiver registered");
     }
 
     @Override
@@ -67,5 +78,14 @@ public class Join extends ActionBarActivity {
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         Log.v("P2P", "Initialized Intents");
+    }
+
+
+    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
+        this.isWifiP2pEnabled = isWifiP2pEnabled;
+    }
+
+    public boolean isWifiP2pEnabled() {
+        return isWifiP2pEnabled;
     }
 }

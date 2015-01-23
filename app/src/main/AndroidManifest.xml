@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ca.drsystems.unleash" >
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -45,7 +48,7 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="AIzaSyCVD9yji1k55pxaoHadG6yruDLwMQYhTVY" />
 
         <activity
             android:name=".Play"
@@ -54,6 +57,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ca.drsystems.unleash.UnleashMain" />
         </activity>
+
     </application>
 
 </manifest>

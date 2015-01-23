@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.util.Log;
 
 /**
  * Created by SRoddick3160 on 1/22/2015.
@@ -13,9 +15,16 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 public class WifiDirectBroadcastReceiver extends BroadcastReceiver{
 
     public Join activity;
+    public WifiP2pManager manager;
+    public Channel channel;
+    PeerListListener peerListListener;
 
-    public WifiDirectBroadcastReceiver(WifiP2pManager mManager, Channel mChannel, Join mActivity) {
+    public WifiDirectBroadcastReceiver(WifiP2pManager mManager, Channel mChannel, Join mActivity, PeerListListener mPeerListListener) {
+        this.manager = mManager;
+        this.channel = mChannel;
         this.activity = mActivity;
+
+        this.peerListListener = mPeerListListener;
     }
 
     @Override
@@ -35,6 +44,11 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver{
 
             // The peer list has changed!  We should probably do something about
             // that.
+
+            if(manager != null){
+                manager.requestPeers(channel, peerListListener);
+            }
+            Log.v("P2P", "Peers Changed!");
 
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 

@@ -61,8 +61,6 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
         createPeerListListener();
-
-        connect();
     }
 
 
@@ -152,6 +150,7 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
                 peersAvailable.clear();
                 peersAvailable.addAll(peerList.getDeviceList());
 
+                connect();
                 // If an AdapterView is backed by this data, notify it
                 // of the change.  For instance, if you have a ListView of available
                 // peers, trigger an update.
@@ -166,8 +165,6 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
 
 
     public void connect() {
-
-        mManager.requestPeers(mChannel, peerListListener);
 
         //Goes through each device in the ArrayList "peers" and connects to it
         if(!info.groupFormed) {

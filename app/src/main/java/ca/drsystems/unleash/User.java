@@ -19,10 +19,7 @@ public class User implements Serializable{
 
     }
 
-    public float getLat(){
-
-        return this.lat;
-    }
+    public float getLat(){ return this.lat; }
 
     public float getLon(){
         return this.lon;

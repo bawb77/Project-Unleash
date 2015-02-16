@@ -11,6 +11,8 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,7 +37,7 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
     WifiP2pManager mManager;
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
-    WifiP2pInfo info;
+    WifiP2pServiceInfo serviceInfo;
 
     /**
      * Adding WifiP2pConfig object is last change.
@@ -72,6 +74,20 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
         receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this, peerListListener);
         registerReceiver(receiver, intentFilter);
         Log.v("P2P", "WifiDirectBroadcastReceiver registered");
+
+        mManager.addServiceRequest(mChannel,
+                WifiP2pServiceRequest.newInstance(serviceInfo.SERVICE_TYPE_VENDOR_SPECIFIC),
+                new ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Log.v("P2P", "Added service!");
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        Log.v("P2P", "Did not add service: " + reason);
+                    }
+                });
 
         initializeDiscovery();
     }
@@ -166,57 +182,65 @@ public class Join extends ActionBarActivity implements WifiP2pManager.Connection
 
     public void connect() {
 
-        //Goes through each device in the ArrayList "peers" and connects to it
-        if(!info.groupFormed) {
+        mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+            @Override
+            public void onConnectionInfoAvailable(WifiP2pInfo info) {
 
-            //Creates the group if it hasn't been formed yet
-            mManager.createGroup(mChannel, new ActionListener() {
-                @Override
-                public void onSuccess() {
-                    Log.v("P2P", "Group formed successfully!");
-                }
+                //Goes through each device in the ArrayList "peers" and connects to it
+                if(!info.groupFormed) {
 
-                @Override
-                public void onFailure(int reason) {
-                    Log.v("P2P", "Group formation failed");
-                }
-            });
-        }
-
-        if(info.isGroupOwner){
-            for (WifiP2pDevice device : peersAvailable) {
-
-                Log.v("P2P", "Connecting to device: " + device.deviceName +
-                        " with address: " + device.deviceAddress);
-
-                final WifiP2pDevice device1 = device;
-
-                if(!peersConnected.contains(device1)) {
-                    WifiP2pConfig config = new WifiP2pConfig();
-                    config.deviceAddress = device1.deviceAddress;
-                    config.wps.setup = WpsInfo.PBC;
-
-
-                    mManager.connect(mChannel, config, new ActionListener() {
-
+                    //Creates the group if it hasn't been formed yet
+                    mManager.createGroup(mChannel, new ActionListener() {
                         @Override
                         public void onSuccess() {
-                            // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                            Log.v("P2P", "Connection to: " + device1.deviceName +
-                                    "initiated");
-                            peersConnected.add(device1);
-                            peersAvailable.remove(device1);
+                            Log.v("P2P", "Group formed successfully!");
                         }
 
                         @Override
                         public void onFailure(int reason) {
-                            Log.v("P2P", "Connection to: " + device1.deviceName +
-                                    "initiation failed");
+                            Log.v("P2P", "Group formation failed: " + reason);
                         }
                     });
                 }
+
+                if(info.isGroupOwner){
+                    for (WifiP2pDevice device : peersAvailable) {
+
+                        Log.v("P2P", "Connecting to device: " + device.deviceName +
+                                " with address: " + device.deviceAddress);
+
+                        final WifiP2pDevice device1 = device;
+
+                        if(!peersConnected.contains(device1)) {
+                            WifiP2pConfig config = new WifiP2pConfig();
+                            config.deviceAddress = device1.deviceAddress;
+                            config.wps.setup = WpsInfo.PBC;
+
+
+                            mManager.connect(mChannel, config, new ActionListener() {
+
+                                @Override
+                                public void onSuccess() {
+                                    // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                                    Log.v("P2P", "Connection to: " + device1.deviceName +
+                                            "initiated");
+                                    peersConnected.add(device1);
+                                    peersAvailable.remove(device1);
+                                }
+
+                                @Override
+                                public void onFailure(int reason) {
+                                    Log.v("P2P", "Connection to: " + device1.deviceName +
+                                            "initiation failed");
+                                }
+                            });
+                        }
+                    }
+                }
             }
-        }
+        });
+
+
     }
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {

@@ -10,8 +10,7 @@ import java.io.Serializable;
 public class User implements Serializable{
 
     private static final long serialVersionUID = 43L;
-    private float lat;
-    private float lon;
+    private float lat, lon;
     private String name;
     private int number;
 

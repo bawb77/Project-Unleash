@@ -8,33 +8,38 @@ import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Play extends FragmentActivity implements WifiP2pManager.ConnectionInfoListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    public joinFrag jf = new joinFrag();
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
     private final IntentFilter intentFilter = new IntentFilter();
     private List<WifiP2pDevice> peersAvailable = new ArrayList();
@@ -43,6 +48,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     Channel mChannel;
     Context context;
+    TextView numplayer;
     WifiP2pManager mManager;
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
@@ -53,6 +59,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         setUpMapIfNeeded();
+        joinFragStart();
 
         context = this;
         initializeIntents();
@@ -61,6 +68,14 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
         createPeerListListener();
+    }
+    public void joinFragStart()
+    {
+        fragmentTransaction.replace(R.id.map, jf).commit();
+    }
+    public void letsPlay(View v)
+    {
+        findViewById(R.id.joinReadyFrag).setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -171,6 +186,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 // Out with the old, in with the new.
                 peersAvailable.clear();
                 peersAvailable.addAll(peerList.getDeviceList());
+
+                numplayer = (TextView)findViewById(R.id.numPlayers);
+                numplayer.setText(peersAvailable.size());
 
                 WifiManager wifiM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
                 List<ScanResult> tempList = wifiM.getScanResults();

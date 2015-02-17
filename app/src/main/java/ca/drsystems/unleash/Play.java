@@ -69,10 +69,12 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         createPeerListListener();
     }
+
     public void joinFragStart()
     {
         fragmentTransaction.replace(R.id.map, jf).commit();
     }
+
     public void letsPlay(View v)
     {
         findViewById(R.id.joinReadyFrag).setVisibility(View.INVISIBLE);
@@ -86,20 +88,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this, peerListListener);
         registerReceiver(receiver, intentFilter);
         Log.v("P2P", "WifiDirectBroadcastReceiver registered");
-
-        mManager.addServiceRequest(mChannel,
-                WifiP2pServiceRequest.newInstance(serviceInfo.SERVICE_TYPE_VENDOR_SPECIFIC),
-                new ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        Log.v("P2P", "Added service!");
-                    }
-
-                    @Override
-                    public void onFailure(int reason) {
-                        Log.v("P2P", "Did not add service: " + reason);
-                    }
-                });
 
         initializeDiscovery();
     }
@@ -158,6 +146,21 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
     private void initializeDiscovery() {
+
+        mManager.addServiceRequest(mChannel,
+                WifiP2pServiceRequest.newInstance(serviceInfo.SERVICE_TYPE_VENDOR_SPECIFIC),
+                new ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Log.v("P2P", "Added service!");
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        Log.v("P2P", "Did not add service: " + reason);
+                    }
+                });
+
         mManager.discoverServices(mChannel, new ActionListener() {
 
             @Override
@@ -172,6 +175,33 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 Log.v("P2P", "Peer Discovery Failed To Initialize");
                 Toast.makeText(Play.this, "Error finding friends, code : " + reasonCode,
                         Toast.LENGTH_SHORT).show();
+
+                if (reasonCode == WifiP2pManager.NO_SERVICE_REQUESTS) {
+
+                    // initiate a stop on service discovery
+                    mManager.stopPeerDiscovery(mChannel, new WifiP2pManager.ActionListener() {
+                        @Override
+                        public void onSuccess() {
+                            // initiate clearing of the all service requests
+                            mManager.clearServiceRequests(mChannel, new WifiP2pManager.ActionListener() {
+                                @Override
+                                public void onSuccess() {
+                                    // reset the service listeners, service requests, and discovery
+                                    initializeDiscovery();
+                                }
+
+                                @Override
+                                public void onFailure(int i) {
+                                    Log.d("P2P", "FAILED to clear service requests ");
+                                }
+                            });
+                        }
+                        @Override
+                        public void onFailure(int i) {
+                            Log.d("P2P", "FAILED to stop discovery");
+                        }
+                    });
+                }
             }
         });
     }
@@ -188,7 +218,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 peersAvailable.addAll(peerList.getDeviceList());
 
                 numplayer = (TextView)findViewById(R.id.numPlayers);
-                numplayer.setText(peersAvailable.size());
+                numplayer.setText("" + peersAvailable.size());
 
                 WifiManager wifiM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
                 List<ScanResult> tempList = wifiM.getScanResults();

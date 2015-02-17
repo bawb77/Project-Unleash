@@ -14,12 +14,12 @@ import android.util.Log;
  */
 public class WifiDirectBroadcastReceiver extends BroadcastReceiver{
 
-    public Join activity;
+    public Play activity;
     public WifiP2pManager manager;
     public Channel channel;
     PeerListListener peerListListener;
 
-    public WifiDirectBroadcastReceiver(WifiP2pManager mManager, Channel mChannel, Join mActivity, PeerListListener mPeerListListener) {
+    public WifiDirectBroadcastReceiver(WifiP2pManager mManager, Channel mChannel, Play mActivity, PeerListListener mPeerListListener) {
         this.manager = mManager;
         this.channel = mChannel;
         this.activity = mActivity;
@@ -49,6 +49,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver{
                 manager.requestPeers(channel, peerListListener);
             }
             Log.v("P2P", "Peers Changed!");
+            activity.connect();
 
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 

@@ -69,7 +69,7 @@ public class UnleashMain extends ActionBarActivity {
     }
     public void joinGame(View v)
     {
-        Intent intent = new Intent(v.getContext(), Join.class);
+        Intent intent = new Intent(v.getContext(), Play.class);
         intent.putExtra("sound_on", sound.isChecked());
         startActivity(intent);
     }

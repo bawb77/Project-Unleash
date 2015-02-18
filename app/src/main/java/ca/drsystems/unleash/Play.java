@@ -16,10 +16,13 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +35,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+
 
 public class Play extends FragmentActivity implements WifiP2pManager.ConnectionInfoListener {
 
@@ -53,6 +59,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
     WifiP2pServiceInfo serviceInfo;
+    Handler handler;
+    boolean deviceServiceStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,22 +69,21 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         setUpMapIfNeeded();
         joinFragStart();
 
+        handler = new Handler();
         context = this;
         initializeIntents();
-
+        DeviceHolder.devices = new ArrayList<WifiP2pDevice>();
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
-
+        deviceServiceStarted = false;
         createPeerListListener();
     }
 
-    public void joinFragStart()
-    {
+    public void joinFragStart() {
         fragmentTransaction.replace(R.id.map, jf).commit();
     }
 
-    public void letsPlay(View v)
-    {
+    public void letsPlay(View v) {
         findViewById(R.id.joinReadyFrag).setVisibility(View.INVISIBLE);
     }
 
@@ -103,33 +110,37 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
             @Override
             public void onFailure(int reason) {
-                Log.v("P2P", "Group Not Removed");
+                Log.v("P2P", "Group Not Removed: " + reason);
             }
         });
         super.onPause();
     }
 
+//    @Override
+//    public void onStop(){
+//        super.onStop();
+//        onDestroy();
+//    }
+
     @Override
-    public void onDestroy(){
-        try {
-            Method[] methods = WifiP2pManager.class.getMethods();
-            for (int i = 0; i < methods.length; i++) {
-                if (methods[i].getName().equals("deletePersistentGroup")) {
-                    // Delete any persistent group
-                    for (int netid = 0; netid < 32; netid++) {
-                        methods[i].invoke(mManager, mChannel, netid, null);
-                    }
-                }
+    public void onDestroy() {
+        mManager.removeGroup(mChannel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.v("P2P", "Group Removed");
             }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.v("P2P", "Group Not Removed: " + reason);
+            }
+        });
         // Disconnect from wifi to avoid channel conflict
         //mWifiManager.disconnect();
         super.onDestroy();
     }
 
-    public void initializeIntents(){
+    public void initializeIntents() {
         //  Indicates a change in the Wi-Fi P2P status.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
 
@@ -196,6 +207,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                                 }
                             });
                         }
+
                         @Override
                         public void onFailure(int i) {
                             Log.d("P2P", "FAILED to stop discovery");
@@ -217,22 +229,24 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 peersAvailable.clear();
                 peersAvailable.addAll(peerList.getDeviceList());
 
-                numplayer = (TextView)findViewById(R.id.numPlayers);
+                numplayer = (TextView) findViewById(R.id.numPlayers);
                 numplayer.setText("" + peersAvailable.size());
 
-                WifiManager wifiM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                List<ScanResult> tempList = wifiM.getScanResults();
-                boolean isThere = false;
-                for(ScanResult iter : tempList){
-                    if((iter.SSID).contains("DIRECT")){
-                        isThere = true;
-                    }
-                }
-                if(!isThere)
-                    createGroup();
-                else
-                    connect();
-
+//                WifiManager wifiM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+//                List<ScanResult> tempList = wifiM.getScanResults();
+//                boolean isThere = false;
+//                for (ScanResult iter : tempList) {
+//                    if ((iter.SSID).contains("DIRECT")) {
+//                        isThere = true;
+//                    }
+//                }
+//                if (isThere){
+//                    connect();
+//                    startClientDeviceService();
+//                }else if(!isThere){
+//                    createGroup();
+//                }
+                createGroup();
 
                 // If an AdapterView is backed by this data, notify it
                 // of the change.  For instance, if you have a ListView of available
@@ -253,39 +267,72 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             public void onConnectionInfoAvailable(WifiP2pInfo info) {
 
                 //Goes through each device in the ArrayList "peers" and connects to it
-                if(!info.groupFormed) {
-
                     //Creates the group if it hasn't been formed yet
                     mManager.createGroup(mChannel, new ActionListener() {
                         @Override
                         public void onSuccess() {
                             Log.v("P2P", "Group formed successfully!");
+
+                            mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                                @Override
+                                public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                                    Log.v("P2P", "Connection Info: " + info);
+                                    if (info.isGroupOwner) {
+                                        Log.v("P2P", "createGroup onSuccess groupOwner");
+
+                                        startHostService();
+                                        connect();
+                                    } else {
+                                        Log.v("P2P", "createGroup onSuccess !groupOwner");
+
+                                        startClientDeviceService();
+                                    }
+                                }
+
+                            });
                         }
 
                         @Override
                         public void onFailure(int reason) {
                             Log.v("P2P", "Group formation failed: " + reason);
+                            if (reason == 2) {
+                                mManager.requestConnectionInfo(mChannel,
+                                        new WifiP2pManager.ConnectionInfoListener() {
+
+                                    @Override
+                                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                                        if (info.isGroupOwner) {
+                                            Log.v("P2P", "createGroup onFailure groupOwner");
+
+                                            if (!deviceServiceStarted){
+                                                Log.v("SOCK", "HostService started: " +
+                                                        deviceServiceStarted);
+                                                startHostService();
+                                            }
+
+                                            connect();
+
+                                        } else if (!deviceServiceStarted) {
+                                            Log.v("P2P", "createGroup onFailure !groupOwner");
+                                            startClientDeviceService();
+                                        }
+                                    }
+                                });
+                            }
                         }
                     });
-                }
-
-                Log.v("P2P", "Group formed: " + info.groupFormed);
-                Log.v("P2P", "Group owner: " + info.isGroupOwner);
-
-                if(info.groupFormed)
-                    connect();
             }
         });
+        deviceServiceStarted = true;
     }
 
-    public void connect(){
+    public void connect() {
         for (WifiP2pDevice device : peersAvailable) {
-
 
 
             final WifiP2pDevice device1 = device;
 
-            if(!peersConnected.contains(device1)) {
+            if (!peersConnected.contains(device1)) {
 
                 Log.v("P2P", "Connecting to device: " + device.deviceName +
                         " with address: " + device.deviceAddress);
@@ -309,11 +356,36 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                     @Override
                     public void onFailure(int reason) {
                         Log.v("P2P", "Connection to: " + device1.deviceName +
-                                " initiation failed");
+                                " initiation failed: " + reason);
                     }
                 });
             }
         }
+        DeviceHolder.devices = peersConnected;
+
+    }
+
+    private void startHostService(){
+        Log.v("SOCK", "Starting HostService");
+        new HostService(handler, this).execute();
+    }
+
+    private void startClientDeviceService(){
+        Log.v("SOCK", "Starting ClientDeviceService");
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run() {
+                try {
+                    Log.v("SOCK", "DeviceHolder info: " + DeviceHolder.info.groupOwnerAddress.toString());
+                    new ClientDeviceService(handler, Play.this, 12345, DeviceHolder.info.groupOwnerAddress).execute();
+                } catch (Exception e) {
+                    Log.v("SOCK", "startClientListener: Exception");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
     }
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
@@ -380,5 +452,49 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
      */
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    public static class DeviceHolder {
+
+        public static List<WifiP2pDevice> devices;
+        public static WifiP2pInfo info;
+    }
+
+    public static class UserLocations {
+
+        static HashMap<Integer, User> userLoc = new HashMap<Integer, User>();
+        static boolean there = false;
+        static int myUser;
+
+        public static HashMap<Integer, User> returnList() {
+
+            Log.v("UL", "UserLocations returnList()");
+            return userLoc;
+        }
+
+        public static void setUser(User user) {
+
+            Log.v("UL", "UserLocations setUser()");
+            there = false;
+            if (user.getNumber() != 4) {
+                userLoc.put(user.getNumber(), user);
+            }
+
+        }
+
+        public static User getUser(int i) {
+            return userLoc.get(i);
+        }
+
+        public static int getMyUser() {
+
+            Log.v("UL", "UserLocations getMyUser: " + myUser);
+            return myUser;
+        }
+
+        public static void setMyUser(int i) {
+            myUser = i;
+            Log.v("UL", "UserLocations setMyUser: " + myUser);
+        }
     }
 }

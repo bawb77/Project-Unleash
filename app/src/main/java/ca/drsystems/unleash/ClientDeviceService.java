@@ -31,6 +31,11 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	public ObjectInputStream ois;
 	public InputStream is;
     final int INITIAL_PACKET_NUMBER = 255;
+    final int START_CONDITIONS = 254;
+    final int USER_CLASS = 253;
+    final int POWER_UP = 252;
+    final int UNLEASH_C = 251;
+    final int UNLEASH_D = 250;
 	private User tmp_user;
 	
 	public ClientDeviceService(Handler handler, Play a, int port, InetAddress s){
@@ -92,44 +97,61 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		}
 	}
 	
-	private void ReceiveThread(){
-		while(true){
-			Log.v("PORT", "in receiveThread");
-		UnleashPackage p = receive();
-		Log.v("PORT", "received package from host");
-		
-			int header = p.getHeader();
-			
-			if(header == INITIAL_PACKET_NUMBER){
-				Log.v("PORT", "package header = INITIAL_PACKET_NUMBER --> my own user data");
-				User u = p.getData();
-				Log.v("PORT", p.getData().toString());
-				
-				this.user.setNumber(u.getNumber());
-				this.user.setName(u.getName());
-				this.user.setLat(u.getLat());
-				this.user.setLon(u.getLon());
-				UserLocations.setMyUser(user.getNumber());
-				UserLocations.setUser(u);
-				Log.v("PORT", "after setMyUser");
-			} else if(header < INITIAL_PACKET_NUMBER){
-				Log.v("PORT", "package header < INITIAL_PACKET_NUMBER --> other user data");
-				tmp_user = p.getData();
-				
-				Log.v("PORT", "setUserLocation for: " + tmp_user.getNumber() + ", Lat: " + tmp_user.getLat());
-				if(tmp_user.getNumber() != this.user.getNumber()){
-					UserLocations.setUser(tmp_user);
-				}
-			}
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		}
-	}
+	private void ReceiveThread() {
+        while (true) {
+            Log.v("PORT", "in receiveThread");
+            UnleashPackage p = receive();
+            Log.v("PORT", "received package from host");
+
+            int header = p.getHeader();
+            switch (header) {
+                case INITIAL_PACKET_NUMBER:
+                    Log.v("PORT", "package header = INITIAL_PACKET_NUMBER --> my own user data");
+                    User u = (User) p.getData();
+                    Log.v("PORT", p.getData().toString());
+
+                    this.user.setNumber(u.getNumber());
+                    this.user.setName(u.getName());
+                    this.user.setLat(u.getLat());
+                    this.user.setLon(u.getLon());
+                    UserLocations.setMyUser(user.getNumber());
+                    UserLocations.setUser(u);
+                    Log.v("PORT", "after setMyUser");
+                    break;
+                case START_CONDITIONS:
+                    startCondition sc = (startCondition) p.getData();
+                    if(sc.getNumber()==0 && sc.getReady())
+                        PlayAct.startGame();
+                    break;
+                case USER_CLASS:
+                    Log.v("PORT", "package header = User class");
+                    tmp_user = (User) p.getData();
+
+                    Log.v("PORT", "setUserLocation for: " + tmp_user.getNumber() + ", Lat: " + tmp_user.getLat());
+                    if (tmp_user.getNumber() != this.user.getNumber())
+                        UserLocations.setUser(tmp_user);
+                    break;
+                case POWER_UP:
+                    //place powerup on map
+                    break;
+                case UNLEASH_D:
+                    //release unleash direction blast
+                    break;
+                case UNLEASH_C:
+                    //release unleash circular blast.
+                    break;
+                default:
+                    break;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
 	
 	private void SendThread(){
 		while(true){
@@ -143,15 +165,14 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 					 user = UserLocations.getUser(UserLocations.getMyUser());
 					 if(user != null){
 						 Log.v("PORT", "my user lat: " + user.getLat());
-						 send();
+						 send(USER_CLASS, user);
 						 Log.v("PORT", "my user data sent");
 					 }
 				 }
 			 });
 		}
-		
 		 try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -233,9 +254,9 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		return null;
 	}
 	
-	public void send(){
+	public void send(int header, Object o){
 		Log.v("PORT", "in send");
-		UnleashPackage p = new UnleashPackage(INITIAL_PACKET_NUMBER, this.user);
+		UnleashPackage p = new UnleashPackage(header, o);
 		
 		try {
 			//ObjectOutputStream oos = new ObjectOutputStream(os);

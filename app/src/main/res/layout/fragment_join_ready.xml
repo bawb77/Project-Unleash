@@ -36,19 +36,17 @@
         android:layout_marginLeft="29dp"
         android:layout_marginStart="29dp" />
 
-    <Button
+    <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/htp"
         android:id="@+id/playButton"
-        android:layout_below="@+id/textView2"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="93dp"
-        android:textSize="35dp"
-        android:textColor="#ffe3f5ff"
-        android:singleLine="true"
+        android:layout_marginTop="37dp"
         android:background="#ff181e21"
-        android:nestedScrollingEnabled="false"
-        android:onClick="letsPlay" />
+        android:textColor="#ffe3f5ff"
+        android:textOn="Ready"
+        android:textOff="Not Ready"
+        android:layout_below="@+id/textView2" />
 
 </RelativeLayout>

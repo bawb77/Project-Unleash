@@ -18,6 +18,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	
 	public Handler handler;
 	private List<WifiP2pDevice> peers;
+    private List<ClientService> clientServiceList;
 	public final static int PORT = 12345;
 	public ServerSocket server;
 	public Play PlayAct;
@@ -27,7 +28,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	public Socket client;
 	public OutputStream os;
 	public InputStream is;
-	
+
 	//private String message;
 	
 	public HostService(Handler h, Play a){
@@ -52,6 +53,13 @@ public class HostService extends AsyncTask<Void, Void, String>{
 			e.printStackTrace();
 		}
 	}
+    public void sendToAll(int header, Object o)
+    {
+        for(ClientService iter : clientServiceList)
+        {
+            iter.send(header, o);
+        }
+    }
 
 	@Override
 	protected String doInBackground(Void... params) {
@@ -79,7 +87,8 @@ public class HostService extends AsyncTask<Void, Void, String>{
 				    public void run() {
 				        try {
 				        	Log.v("SOCK", "Creating new Thread for client: " + user_num);
-				        	new ClientService(handler, PlayAct, device, user_num, client, os, is);
+				        	ClientService temp = new ClientService(handler, PlayAct, device, user_num, client, os, is);
+                            clientServiceList.add(temp);
 				        	user_num++;
 				        } catch (Exception e) {
 				            e.printStackTrace();

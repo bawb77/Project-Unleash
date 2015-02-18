@@ -6,8 +6,9 @@ package ca.drsystems.unleash;
 public class UnleashAttackDirect {
     private int player, powerLvl;
     long time;
-    public float lat1,lon1,lat2,lon2;
-    public void UnleashAttack(int player, int powerLvl, float lat1, float lon1, float lat2, float lon2)
+    public double lat1,lon1,lat2,lon2;
+    final int id = 250;
+    public UnleashAttackDirect(int player, int powerLvl, double lat1, double lon1, double lat2, double lon2)
     {
         this.player = player;
         this.powerLvl = powerLvl;
@@ -19,9 +20,9 @@ public class UnleashAttackDirect {
     }
     public int getPlayer(){return player;}
     public int getPowerLvl(){return powerLvl;}
-    public float getLat1(){return lat1;}
-    public float getLon1(){return lon1;}
-    public float getLat2(){return lat2;}
-    public float getLon2(){return lon2;}
+    public double getLat1(){return lat1;}
+    public double getLon1(){return lon1;}
+    public double getLat2(){return lat2;}
+    public double getLon2(){return lon2;}
     public long getTime(){return time;}
 }

@@ -8,9 +8,12 @@ import java.io.Serializable;
 public class startCondition implements Serializable {
     private static final long serialVersionUID = 43L;
     private boolean ready;
-    private float xur, xll, yur, yll;
+    private double xur, xll, yur, yll;
     private int number;
-    public void startCondition(boolean ready, int number, float xur,float xll,float yur,float yll)
+
+    final int id = 254;
+
+    public startCondition(boolean ready, int number, double xur,double yur,double xll,double yll)
     {
         this.ready = ready;
         this.number = number;

@@ -6,8 +6,11 @@ package ca.drsystems.unleash;
 public class UnleashAttack {
     private int player, powerLvl;
     long time;
-    public float lat,lon;
-    public void UnleashAttack(int player, int powerLvl, float lat, float lon)
+    public double lat,lon;
+
+    final int id = 251;
+
+    public UnleashAttack(int player, int powerLvl, double lat, double lon)
     {
         this.player = player;
         this.powerLvl = powerLvl;
@@ -17,7 +20,7 @@ public class UnleashAttack {
     }
     public int getPlayer(){return player;}
     public int getPowerLvl(){return powerLvl;}
-    public float getLat(){return lat;}
-    public float getLon(){return lon;}
+    public double getLat(){return lat;}
+    public double getLon(){return lon;}
     public long getTime(){return time;}
 }

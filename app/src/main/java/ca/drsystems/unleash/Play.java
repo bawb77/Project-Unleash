@@ -61,6 +61,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     Handler handler;
     boolean deviceServiceStarted;
     boolean host;
+    int tCount;
     final int INITIAL_PACKET_NUMBER = 255;
     final int START_CONDITIONS = 254;
     final int USER_CLASS = 253;
@@ -109,7 +110,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
         if(host)
         {
-            hostService.sendToAll(START_CONDITIONS, strCon);
+            if(tCount == peersConnected.size()) {
+                hostService.sendToAll(START_CONDITIONS, strCon);
+                startGame();
+            }
         }
         else if(!host)
         {
@@ -382,7 +386,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         Log.v("SOCK", "Starting HostService");
         hostService = new HostService(handler, this);
         hostService.execute();
-        ready.setVisibility(View.VISIBLE);
+        tCount = 0;
     }
 
     private void startClientDeviceService(){
@@ -404,7 +408,22 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         thread.start();
     }
+    public void startingMapCoor(LatLngBounds in)
+    {
 
+    }
+    public void startCount(boolean in)
+    {
+        if(in)
+            tCount++;
+        else if (!in)
+            tCount--;
+
+        if(tCount == peersConnected.size())
+        {
+            ready.setVisibility(View.VISIBLE);
+        }
+    }
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }

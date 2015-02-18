@@ -1,5 +1,8 @@
 package ca.drsystems.unleash;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 import java.io.Serializable;
 
 /**
@@ -29,6 +32,12 @@ public class startCondition implements Serializable {
     public int getNumber()
     {
         return number;
+    }
+    public LatLngBounds mapSet()
+    {
+        LatLng NE = new LatLng(xur,yur);
+        LatLng SW = new LatLng(xll,yll);
+        return new LatLngBounds(SW,NE);
     }
 
 }

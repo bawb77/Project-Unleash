@@ -120,6 +120,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     break;
                 case START_CONDITIONS:
                     startCondition sc = (startCondition) p.getData();
+                    PlayAct.startingMapCoor(sc.mapSet());
                     if(sc.getNumber()==0 && sc.getReady())
                         PlayAct.startGame();
                     break;

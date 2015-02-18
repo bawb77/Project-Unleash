@@ -110,7 +110,8 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         });
                         break;
                     case START_CONDITIONS:
-
+                        startCondition sc = (startCondition) p.getData();
+                        PlayAct.startCount(sc.getReady());
                         break;
                     case USER_CLASS:
                         User u2 = (User)p.getData();

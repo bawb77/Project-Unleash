@@ -12,12 +12,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import ca.drsystems.unleash.Play.DeviceHolder;
-
 public class HostService extends AsyncTask<Void, Void, String>{
 	
 	public Handler handler;
-	private List<WifiP2pDevice> peers;
     private List<ClientService> clientServiceList;
 	public final static int PORT = 12345;
 	public ServerSocket server;
@@ -33,10 +30,9 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	
 	public HostService(Handler h, Play a){
 		this.handler = h;
-		this.peers = DeviceHolder.devices;
 		this.PlayAct = a;
 		this.run = false;
-		Log.v("SOCK", "HostService constructor. DeviceHolder.devices size = " + DeviceHolder.devices.size());
+		Log.v("SOCK", "HostService constructor");
 		createSockets();
 	}
 	

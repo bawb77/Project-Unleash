@@ -40,13 +40,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/htp"
-        android:id="@+id/playButton"
+        android:id="@+id/playButtonToggle"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="37dp"
         android:background="#ff181e21"
         android:textColor="#ffe3f5ff"
         android:textOn="Ready"
         android:textOff="Not Ready"
-        android:layout_below="@+id/textView2" />
+        android:layout_below="@+id/textView2"
+        android:onClick="toggleButton" />
 
 </RelativeLayout>

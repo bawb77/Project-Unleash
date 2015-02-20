@@ -117,12 +117,14 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         User u2 = (User)p.getData();
                         this.user.setLat(u2.getLat());
                         this.user.setLon(u2.getLon());
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
+//                        handler.post(new Runnable() {
+//                            @Override
+//                            public void run() {
                                 Play.UserLocations.setUser(user);
-                            }
-                        });
+
+                        Log.v("LOC", "Received user info: " + user);
+//                            }
+//                        });
                         break;
                     case POWER_UP:
                         break;

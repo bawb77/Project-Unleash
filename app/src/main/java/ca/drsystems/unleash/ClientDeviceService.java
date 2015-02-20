@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import com.google.android.gms.location.LocationServices;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -116,7 +118,9 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     this.user.setLon(u.getLon());
                     UserLocations.setMyUser(user.getNumber());
                     UserLocations.setUser(u);
-                    Log.v("PORT", "after setMyUser");
+                    Log.v("PORT", "Set my user to: " + u);
+                    PlayAct.startLocationRequest();
+
                     break;
                 case START_CONDITIONS:
                     startCondition sc = (startCondition) p.getData();

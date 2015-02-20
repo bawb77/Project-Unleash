@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import com.google.android.gms.location.LocationServices;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,6 +36,12 @@ public class HostService extends AsyncTask<Void, Void, String>{
 		this.run = false;
 		Log.v("SOCK", "HostService constructor");
 		createSockets();
+        User u = new User();
+        u.setNumber(0);
+        Play.UserLocations.setMyUser(0);
+        Play.UserLocations.setUser(u);
+        PlayAct.startLocationRequest();
+
 	}
 	
 	private void createSockets(){

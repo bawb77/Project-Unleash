@@ -2,6 +2,7 @@ package ca.drsystems.unleash;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -24,6 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -35,7 +41,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Play extends FragmentActivity implements WifiP2pManager.ConnectionInfoListener {
+public class Play extends FragmentActivity implements WifiP2pManager.ConnectionInfoListener,
+        GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     public joinFrag jf = new joinFrag();
@@ -47,7 +54,15 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     private List<WifiP2pDevice> peersConnected = new ArrayList();
     private boolean isWifiP2pEnabled;
 
+    LocationListener locationListener;
+
     ClientDeviceService clientDeviceService;
+    public static final LocationRequest locationRequest = new LocationRequest()
+            .create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(500);
+    GoogleApiClient myGoogleApiClient;
+
     HostService hostService;
     Channel mChannel;
     Context context;
@@ -73,6 +88,12 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+        myGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        myGoogleApiClient.connect();
         host = false;
         deviceServiceStarted = false;
         handler = new Handler();
@@ -83,6 +104,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         createPeerListListener();
         setUpMapIfNeeded();
         joinFragStart();
+
     }
 
     public void joinFragStart() {
@@ -155,7 +177,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             }
         }
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 createGroupLogic();
@@ -172,8 +194,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                     @Override
                     public void onConnectionInfoAvailable(WifiP2pInfo info) {
                         Log.v("P2P", "Connection Info: " + info);
-                        if(info.groupFormed)
-                        {
+                        if (info.groupFormed) {
                             if (info.isGroupOwner && !deviceServiceStarted) {
                                 Log.v("SOCK", "Has HostService started yet: " + deviceServiceStarted);
                                 startHostService();
@@ -181,12 +202,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                                 Log.v("P2P", "Has DeviceService started yet: " + deviceServiceStarted);
                                 startClientDeviceService(info);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             Log.v("P2P", "recursion" + peersAvailable);
                             Handler handler = new Handler();
-                            handler.postDelayed(new Runnable(){
+                            handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
                                     connect(peersAvailable);
@@ -245,7 +264,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
 
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(50.671191, -120.363182)).title("Marker"));
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(50.671191, -120.363182)).title("Marker"));
+
     }
 
     private void initializeDiscovery() {
@@ -326,6 +346,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             clientDeviceService.send(START_CONDITIONS, strCon);
         }
 
+    }
+
+    public void startLocationRequest(){
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                myGoogleApiClient, locationRequest, this);
     }
 
 
@@ -437,9 +462,43 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 Log.v("P2P", "Group Not Removed: " + reason);
             }
         });
+        myGoogleApiClient.disconnect();
         // Disconnect from wifi to avoid channel conflict
         //mWifiManager.disconnect();
         super.onDestroy();
+    }
+
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if(UserLocations.getMyUser() != INITIAL_PACKET_NUMBER) {
+            User u = UserLocations.getUser(UserLocations.getMyUser());
+
+            Log.v("LOC", "Setting user: " + UserLocations.getMyUser() + "'s location to: " + location);
+
+            u.setNumber(UserLocations.getMyUser());
+            u.setLat(location.getLatitude());
+            u.setLon(location.getLongitude());
+
+            UserLocations.setUser(u);
+
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.i("LOC", "GoogleApiClient connection has failed");
     }
 
 
@@ -457,9 +516,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         public static void setUser(User user) {
 
-            Log.v("UL", "UserLocations setUser()");
+            Log.v("UL", "UserLocations setUser()" + user);
             there = false;
-            if (user.getNumber() != 249) {
+            if (user.getNumber() < 250) {
                 userLoc.put(user.getNumber(), user);
             }
 

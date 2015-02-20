@@ -2,8 +2,6 @@ package ca.drsystems.unleash;
 
 import android.content.Context;
 import android.content.IntentFilter;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -55,11 +53,12 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     HostService hostService;
     Channel mChannel;
     Context context;
-    TextView numplayer;
+    TextView numPlayer;
     WifiP2pManager mManager;
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
     WifiP2pServiceInfo serviceInfo;
+    WifiP2pInfo gInfo;
     Handler handler;
     boolean deviceServiceStarted;
     boolean host;
@@ -265,78 +264,68 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 peersAvailable.addAll(peerList.getDeviceList());
 
                 Log.v("P2P", "peerList: " + peerList);
-                numplayer = (TextView) findViewById(R.id.numPlayers);
-                numplayer.setText("" + peersAvailable.size());
-
-                WifiManager wifiM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                List<ScanResult> tempList = wifiM.getScanResults();
-                boolean isThere = false;
-
-//                for (ScanResult iter : tempList) {
-//                    if ((iter.SSID).contains("DIRECT")) {
-//                        isThere = true;
-//                    }
-//                }
-//                Log.v("P2P", "Direct Check " + isThere);
-//                if(isThere)
-//                    startClientDeviceService();
-//                else if(!isThere)
-                    createGroup();
+                numPlayer = (TextView) findViewById(R.id.numPlayers);
+                numPlayer.setText("" + peersAvailable.size());
+                connect();
+                //createGroup();
+                createGroupLogic();
             }
         };
     }
 
     public void createGroup() {
-
         mManager.createGroup(mChannel, new ActionListener() {
             @Override
             public void onSuccess() {
                 Log.v("P2P", "Group formed successfully!");
-                connect();
-                mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
-                    @Override
-                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                        Log.v("P2P", "Connection Info: " + info);
-                        if (info.isGroupOwner && !deviceServiceStarted) {
-                            startHostService();
-                        } else if (!deviceServiceStarted){
-                            Log.v("P2P", "createGroup onSuccess !groupOwner");
-                            startClientDeviceService(info);
-                        }
-                    }
-                });
+                //connect();
+                createGroupLogic();
             }
-
             @Override
             public void onFailure(int reason) {
                 Log.v("P2P", "Group formation failed: " + reason);
-                connect();
-                mManager.requestConnectionInfo(mChannel,
-                    new WifiP2pManager.ConnectionInfoListener() {
-
-                    @Override
-                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-
-                        Log.v("P2P", "createGroup onFailure groupOwner");
-
-                        if (info.isGroupOwner && !deviceServiceStarted) {
-                            Log.v("SOCK", "HostService started yet: " +
-                                    deviceServiceStarted);
-                            startHostService();
-                        } else if (!deviceServiceStarted) {
-                            Log.v("P2P", "createGroup onFailure !groupOwner");
-
-                            startClientDeviceService(info);
-                        }
-                    }
-                });
+                //connect();
+                createGroupLogic();
             }
         });
 
     }
+    public void createGroupLogic() {
+        mManager.requestConnectionInfo(mChannel,
+                new WifiP2pManager.ConnectionInfoListener() {
+
+                    @Override
+                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                        if(info.groupFormed)
+                        {
+                            Log.v("P2P", "Connection Info: " + info);
+                            if (info.isGroupOwner && !deviceServiceStarted) {
+                                Log.v("SOCK", "Has HostService started yet: " + deviceServiceStarted);
+                               startHostService();
+                            } else if (!deviceServiceStarted) {
+                                Log.v("P2P", "Has DeviceService started yet: " + deviceServiceStarted);
+                               startClientDeviceService(info);
+                            }
+                        }
+                        else
+                        {
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable(){
+                                @Override
+                                public void run() {
+                                    createGroupLogic();
+                                }
+                            }, 1000);
+                        }
+
+                    }
+                });
+    }
 
     public void connect() {
-        for (WifiP2pDevice device : peersAvailable) {
+        List<WifiP2pDevice> temp = peersAvailable;
+
+        for (WifiP2pDevice device : temp) {
             final WifiP2pDevice device1 = device;
 
             if (!peersConnected.contains(device1)) {
@@ -354,7 +343,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                         // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
                         Log.v("P2P", "Connection to: " + device1.deviceName +
                                 " initiated");
-                        peersConnected.add(device1);
+                       // peersConnected.add(device1);
                         peersAvailable.remove(device1);
                     }
                     @Override

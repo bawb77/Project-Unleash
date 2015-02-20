@@ -89,7 +89,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		}
 		
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,7 +145,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     break;
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

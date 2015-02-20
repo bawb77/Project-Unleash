@@ -33,16 +33,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Join"
-            android:label="@string/title_activity_join"
-            android:parentActivityName=".UnleashMain"
-            android:screenOrientation="portrait"
-            android:configChanges="keyboardHidden|orientation|screenSize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="ca.drsystems.unleash.UnleashMain" />
-        </activity>
-        <activity
             android:name=".Tutorial"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_tutorial"
@@ -61,7 +51,8 @@
 
         <activity
             android:name=".Play"
-            android:label="@string/title_activity_play" >
+            android:label="@string/title_activity_play"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ca.drsystems.unleash.UnleashMain" />

@@ -266,9 +266,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 Log.v("P2P", "peerList: " + peerList);
                 numPlayer = (TextView) findViewById(R.id.numPlayers);
                 numPlayer.setText("" + peersAvailable.size());
+                //if(peerList.getDeviceList().size() > peersConnected.size())
                 connect();
                 //createGroup();
-                createGroupLogic();
+                //createGroupLogic();
             }
         };
     }
@@ -291,14 +292,15 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     }
     public void createGroupLogic() {
+        Log.v("P2P", "CreateGroupLogic");
         mManager.requestConnectionInfo(mChannel,
                 new WifiP2pManager.ConnectionInfoListener() {
 
                     @Override
                     public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                        Log.v("P2P", "Connection Info: " + info);
                         if(info.groupFormed)
                         {
-                            Log.v("P2P", "Connection Info: " + info);
                             if (info.isGroupOwner && !deviceServiceStarted) {
                                 Log.v("SOCK", "Has HostService started yet: " + deviceServiceStarted);
                                startHostService();
@@ -309,11 +311,12 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                         }
                         else
                         {
+                            Log.v("P2P", "recursion" + peersAvailable);
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable(){
                                 @Override
                                 public void run() {
-                                    createGroupLogic();
+                                    connect();
                                 }
                             }, 1000);
                         }
@@ -328,7 +331,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         for (WifiP2pDevice device : temp) {
             final WifiP2pDevice device1 = device;
 
-            if (!peersConnected.contains(device1)) {
+            if (device1.status == WifiP2pDevice.AVAILABLE) {
 
                 Log.v("P2P", "Connecting to device: " + device.deviceName +
                         " with address: " + device.deviceAddress);
@@ -343,8 +346,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                         // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
                         Log.v("P2P", "Connection to: " + device1.deviceName +
                                 " initiated");
-                       // peersConnected.add(device1);
-                        peersAvailable.remove(device1);
+
+                        //peersConnected.add(device1);
+                        //peersAvailable.remove(device1);
                     }
                     @Override
                     public void onFailure(int reason) {
@@ -354,6 +358,13 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 });
             }
         }
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable(){
+            @Override
+            public void run() {
+                createGroupLogic();
+            }
+        }, 1000);
     }
 
     private void startHostService(){

@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
-import com.google.android.gms.location.LocationServices;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -125,7 +123,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                 case START_CONDITIONS:
                     startCondition sc = (startCondition) p.getData();
                     PlayAct.startingMapCoor(sc.mapSet());
-                    if(sc.getNumber()==0 && sc.getReady())
+                    if(sc.getReady())
                         PlayAct.startGame();
                     break;
                 case USER_CLASS:

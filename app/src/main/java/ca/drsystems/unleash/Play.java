@@ -30,11 +30,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -75,6 +75,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     Handler handler;
     boolean deviceServiceStarted;
     boolean host;
+    int connected;
     int tCount;
     final int INITIAL_PACKET_NUMBER = 255;
     final int START_CONDITIONS = 254;
@@ -142,6 +143,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 Log.v("P2P", "peerList: " + peerList);
                 numPlayer = (TextView) findViewById(R.id.numPlayers);
                 numPlayer.setText("" + peersAvailable.size());
+
                 connect(peersAvailable);
             }
         };
@@ -221,10 +223,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     private void startHostService(){
         deviceServiceStarted = true;
         host = true;
+        tCount = 0;
+        connected = 0;
         Log.v("SOCK", "Starting HostService");
         hostService = new HostService(handler, this);
         hostService.execute();
-        tCount = 0;
     }
 
 
@@ -247,6 +250,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         });
         thread.start();
     }
+
 
 
     private void setUpMapIfNeeded() {
@@ -327,22 +331,27 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             }
         });
     }
+    public void letsPlay(boolean readyTemp, ToggleButton r) {
 
-
-    public void letsPlay(boolean readyTemp) {
-        LatLngBounds temp = mMap.getProjection().getVisibleRegion().latLngBounds;
-        LatLng temp2 = temp.northeast;
-        LatLng temp3 = temp.southwest;
-        startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
         if(host)
         {
-            if(tCount == peersAvailable.size()) {
+
+            if(tCount == connected) {
+                LatLngBounds temp = mMap.getProjection().getVisibleRegion().latLngBounds;
+                LatLng temp2 = temp.northeast;
+                LatLng temp3 = temp.southwest;
+                startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
                 hostService.sendToAll(START_CONDITIONS, strCon);
                 startGame();
+            }
+            else
+            {
+                r.setChecked(false);
             }
         }
         else if(!host)
         {
+            startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser());
             clientDeviceService.send(START_CONDITIONS, strCon);
         }
 
@@ -361,7 +370,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void startingMapCoor(LatLngBounds in)
     {
-
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(in,0));
     }
 
 
@@ -371,11 +380,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             tCount++;
         else if (!in)
             tCount--;
-
-        if(tCount == peersConnected.size())
-        {
-           // ready.setVisibility(View.VISIBLE);
-        }
     }
 
 
@@ -383,9 +387,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     {
         ToggleButton r = (ToggleButton)v;
         if(r.isChecked())
-            letsPlay(true);
+            letsPlay(true, r);
         else if (!r.isChecked())
-            letsPlay(false);
+            letsPlay(false, r);
     }
 
 

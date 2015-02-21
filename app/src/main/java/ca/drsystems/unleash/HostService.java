@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
-import com.google.android.gms.location.LocationServices;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -93,6 +91,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
 				        	Log.v("SOCK", "Creating new Thread for client: " + user_num);
 				        	ClientService temp = new ClientService(handler, PlayAct, device, user_num, client, os, is);
                             clientServiceList.add(temp);
+                            PlayAct.connected++;
 				        	user_num++;
 				        } catch (Exception e) {
 				            e.printStackTrace();

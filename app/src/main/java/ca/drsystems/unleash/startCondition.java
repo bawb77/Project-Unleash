@@ -13,6 +13,7 @@ public class startCondition implements Serializable {
     private boolean ready;
     private double xur, xll, yur, yll;
     private int number;
+    private final double EMPTY = 0.0;
 
     final int id = 254;
 
@@ -24,6 +25,15 @@ public class startCondition implements Serializable {
         this.xll = xll;
         this.yur = yur;
         this.yll = yll;
+    }
+    public startCondition(boolean ready, int number)
+    {
+        this.ready = ready;
+        this.number = number;
+        this.xur = EMPTY;
+        this.xll = EMPTY;
+        this.yur = EMPTY;
+        this.yll = EMPTY;
     }
     public boolean getReady()
     {

@@ -111,20 +111,13 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         break;
                     case START_CONDITIONS:
                         startCondition sc = (startCondition) p.getData();
+                        Log.v("PORT","STCON" + sc.getReady());
                         PlayAct.startCount(sc.getReady());
                         break;
                     case USER_CLASS:
-                        User u2 = (User)p.getData();
-                        this.user.setLat(u2.getLat());
-                        this.user.setLon(u2.getLon());
-//                        handler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-                                Play.UserLocations.setUser(user);
-
-                        Log.v("LOC", "Received user info: " + user);
-//                            }
-//                        });
+                        tmp_user = (User)p.getData();
+                        Play.UserLocations.setUser(tmp_user);
+                        Log.v("LOC", "Host Receiving user info: " + p.getData());
                         break;
                     case POWER_UP:
                         break;
@@ -154,6 +147,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                     Log.v("SOCKC", "ClientService.java: Getting UserLocations.returnList(), a list of all users");
                     userlist = Play.UserLocations.returnList();
                     Log.v("SOCKC", "ClientService.java: Userlist size: " + userlist.size());
+                    Log.v("SOCKC", "User Info " + userlist);
 
                     for(User u : userlist.values()){
                         Log.v("SOCKC", "ClientService.java: Sending user in userlist: " + u.getNumber());

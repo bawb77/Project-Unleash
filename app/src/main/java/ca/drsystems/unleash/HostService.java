@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HostService extends AsyncTask<Void, Void, String>{
@@ -38,7 +39,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
         u.setNumber(0);
         Play.UserLocations.setMyUser(0);
         Play.UserLocations.setUser(u);
-        PlayAct.startLocationRequest();
+        clientServiceList = new ArrayList<ClientService>();
 
 	}
 	

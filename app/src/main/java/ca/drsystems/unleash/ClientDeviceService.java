@@ -117,20 +117,23 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     UserLocations.setMyUser(user.getNumber());
                     UserLocations.setUser(u);
                     Log.v("PORT", "Set my user to: " + u);
-                    PlayAct.startLocationRequest();
-
                     break;
                 case START_CONDITIONS:
                     startCondition sc = (startCondition) p.getData();
+                    Log.v("PORT","STCON" + sc.getReady());
                     PlayAct.startingMapCoor(sc.mapSet());
                     if(sc.getReady())
+                    {
+                        Log.v("PORT","Client Start Game");
                         PlayAct.startGame();
+                    }
+
                     break;
                 case USER_CLASS:
                     Log.v("PORT", "package header = User class");
                     tmp_user = (User) p.getData();
 
-                    Log.v("PORT", "setUserLocation for: " + tmp_user.getNumber() + ", Lat: " + tmp_user.getLat());
+                    Log.v("PORT", "Client Receiving setUserLocation for: " + tmp_user.getNumber() + ", Lat: " + tmp_user.getLat());
                     if (tmp_user.getNumber() != this.user.getNumber())
                         UserLocations.setUser(tmp_user);
                     break;
@@ -164,8 +167,8 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 			handler.post(new Runnable(){
 				 @Override
 				 public void run(){
-					 Log.v("PORT", "get my user for sending");
 					 user = UserLocations.getUser(UserLocations.getMyUser());
+                     Log.v("PORT", "get my user for sending" + UserLocations.getUser(UserLocations.getMyUser()));
 					 if(user != null){
 						 Log.v("PORT", "my user lat: " + user.getLat());
 						 send(USER_CLASS, user);
@@ -236,8 +239,9 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 					Log.v("PORT", "ois is available");
 					Object o;
 					o = ois.readObject();
-					Log.v("PORT", "object received vom ois");
+
 					UnleashPackage p = (UnleashPackage)o;
+                    Log.v("PORT", "Client: object received from ois: " + p.getHeader());
 					return p;
 				}
 			} catch (ClassNotFoundException e) {
@@ -264,6 +268,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		try {
 			//ObjectOutputStream oos = new ObjectOutputStream(os);
 			Log.v("PORT", "try sending my info: (lat: " + this.user.getLat() + ")");
+            Log.v("SOCKC", "ClientDevice " + user.getNumber() + " Sending user info, header: " + header);
 			oos.writeObject(p);
 			Log.v("PORT", "send method: sent");
 		} catch (IOException e) {

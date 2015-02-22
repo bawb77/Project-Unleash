@@ -106,6 +106,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         setUpMapIfNeeded();
         joinFragStart();
 
+
     }
 
     public void joinFragStart() {
@@ -152,6 +153,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void connect(List<WifiP2pDevice> temp) {
         for (WifiP2pDevice device : temp) {
+
             final WifiP2pDevice device1 = device;
 
             if (device1.status == WifiP2pDevice.AVAILABLE) {
@@ -228,6 +230,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         Log.v("SOCK", "Starting HostService");
         hostService = new HostService(handler, this);
         hostService.execute();
+        startLocationRequest();
     }
 
 
@@ -249,6 +252,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             }
         });
         thread.start();
+        startLocationRequest();
     }
 
 
@@ -335,7 +339,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         if(host)
         {
-
+            Log.d("P2P", "*************************************************************************************************HOST SENDS STRCON********************");
+            Log.v("P2p", "Counts" + tCount + ":" + connected);
             if(tCount == connected) {
                 LatLngBounds temp = mMap.getProjection().getVisibleRegion().latLngBounds;
                 LatLng temp2 = temp.northeast;
@@ -351,6 +356,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         }
         else if(!host)
         {
+            Log.d("P2P", "*************************************************************************************************Client SENDS STRCON********************");
             startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser());
             clientDeviceService.send(START_CONDITIONS, strCon);
         }
@@ -380,6 +386,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             tCount++;
         else if (!in)
             tCount--;
+        Log.v("P2P","tcount" + tCount);
     }
 
 
@@ -476,7 +483,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     @Override
     public void onConnected(Bundle bundle) {
-
+        Location location = LocationServices.FusedLocationApi.getLastLocation(myGoogleApiClient);
+        Log.v("P2P", "location" + location);
+        LatLng temp = new LatLng(location.getLatitude(),location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(temp,19));
     }
 
     @Override

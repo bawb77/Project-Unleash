@@ -1,5 +1,8 @@
 package ca.drsystems.unleash;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 import java.io.Serializable;
 
 /**
@@ -8,9 +11,13 @@ import java.io.Serializable;
 public class startCondition implements Serializable {
     private static final long serialVersionUID = 43L;
     private boolean ready;
-    private float xur, xll, yur, yll;
+    private double xur, xll, yur, yll;
     private int number;
-    public void startCondition(boolean ready, int number, float xur,float xll,float yur,float yll)
+    private final double EMPTY = 0.0;
+
+    final int id = 254;
+
+    public startCondition(boolean ready, int number, double xur,double yur,double xll,double yll)
     {
         this.ready = ready;
         this.number = number;
@@ -19,6 +26,15 @@ public class startCondition implements Serializable {
         this.yur = yur;
         this.yll = yll;
     }
+    public startCondition(boolean ready, int number)
+    {
+        this.ready = ready;
+        this.number = number;
+        this.xur = EMPTY;
+        this.xll = EMPTY;
+        this.yur = EMPTY;
+        this.yll = EMPTY;
+    }
     public boolean getReady()
     {
         return ready;
@@ -26,6 +42,12 @@ public class startCondition implements Serializable {
     public int getNumber()
     {
         return number;
+    }
+    public LatLngBounds mapSet()
+    {
+        LatLng NE = new LatLng(xur,yur);
+        LatLng SW = new LatLng(xll,yll);
+        return new LatLngBounds(SW,NE);
     }
 
 }

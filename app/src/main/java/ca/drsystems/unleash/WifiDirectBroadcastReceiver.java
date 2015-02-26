@@ -3,10 +3,9 @@ package ca.drsystems.unleash;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 
 /**
@@ -49,7 +48,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver{
                 manager.requestPeers(channel, peerListListener);
             }
             Log.v("P2P", "Peers Changed!");
-            activity.connect();
+            //activity.connect();
 
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 

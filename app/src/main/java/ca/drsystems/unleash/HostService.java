@@ -10,14 +10,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
-
-import ca.drsystems.unleash.Play.DeviceHolder;
 
 public class HostService extends AsyncTask<Void, Void, String>{
 	
 	public Handler handler;
-	private List<WifiP2pDevice> peers;
+    private List<ClientService> clientServiceList;
 	public final static int PORT = 12345;
 	public ServerSocket server;
 	public Play PlayAct;
@@ -27,16 +26,21 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	public Socket client;
 	public OutputStream os;
 	public InputStream is;
-	
+
 	//private String message;
 	
 	public HostService(Handler h, Play a){
 		this.handler = h;
-		this.peers = DeviceHolder.devices;
 		this.PlayAct = a;
 		this.run = false;
-		Log.v("SOCK", "HostService constructor. DeviceHolder.devices size = " + DeviceHolder.devices.size());
+		Log.v("SOCK", "HostService constructor");
 		createSockets();
+        User u = new User();
+        u.setNumber(0);
+        Play.UserLocations.setMyUser(0);
+        Play.UserLocations.setUser(u);
+        clientServiceList = new ArrayList<ClientService>();
+
 	}
 	
 	private void createSockets(){
@@ -52,6 +56,13 @@ public class HostService extends AsyncTask<Void, Void, String>{
 			e.printStackTrace();
 		}
 	}
+    public void sendToAll(int header, Object o)
+    {
+        for(ClientService iter : clientServiceList)
+        {
+            iter.send(header, o);
+        }
+    }
 
 	@Override
 	protected String doInBackground(Void... params) {
@@ -79,7 +90,9 @@ public class HostService extends AsyncTask<Void, Void, String>{
 				    public void run() {
 				        try {
 				        	Log.v("SOCK", "Creating new Thread for client: " + user_num);
-				        	new ClientService(handler, PlayAct, device, user_num, client, os, is);
+				        	ClientService temp = new ClientService(handler, PlayAct, device, user_num, client, os, is);
+                            clientServiceList.add(temp);
+                            PlayAct.connected++;
 				        	user_num++;
 				        } catch (Exception e) {
 				            e.printStackTrace();

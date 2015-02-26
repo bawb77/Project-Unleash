@@ -10,17 +10,19 @@ import java.io.Serializable;
 public class User implements Serializable{
 
     private static final long serialVersionUID = 43L;
-    private float lat, lon;
+    private double lat, lon;
     private String name;
     private int number;
+    final int id = 253;
+
 
     public User(){
 
     }
 
-    public float getLat(){ return this.lat; }
+    public double getLat(){ return this.lat; }
 
-    public float getLon(){
+    public double getLon(){
         return this.lon;
     }
 
@@ -32,11 +34,11 @@ public class User implements Serializable{
         return this.number;
     }
 
-    public void setLat(float l){
+    public void setLat(double l){
         this.lat = l;
     }
 
-    public void setLon(float l){
+    public void setLon(double l){
         this.lon = l;
     }
 

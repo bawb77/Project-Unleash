@@ -7,10 +7,12 @@ import java.io.Serializable;
  */
 public class PowerUp implements Serializable {
     private static final long serialVersionUID = 43L;
-    private float lat, lon;
+    private double lat, lon;
     long time;
     private int powerNum, player;
-    public void PowerUp(float lat, float lon, int powerNum, int player)
+    final int id = 252;
+
+    public PowerUp(double lat, double lon, int powerNum, int player)
     {
         this.lat = lat;
         this.lon = lon;
@@ -18,11 +20,11 @@ public class PowerUp implements Serializable {
         this.player = player;
         this.time = System.currentTimeMillis();
     }
-    public float getLat()
+    public double getLat()
     {
         return lat;
     }
-    public float getLon()
+    public double getLon()
     {
        return lon;
     }

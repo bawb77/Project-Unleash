@@ -8,7 +8,7 @@ public class UnleashPackage implements Serializable{
     private int header;
     private Object data;
 
-    public UnleashPackage(int h, User d){
+    public UnleashPackage(int h, Object d){
         this.header = h;
         this.data = d;
     }

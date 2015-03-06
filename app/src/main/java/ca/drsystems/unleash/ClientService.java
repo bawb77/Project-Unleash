@@ -115,7 +115,9 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         PlayAct.startCount(sc.getReady());
                         break;
                     case USER_CLASS:
-                        tmp_user = (User)p.getData();
+                        tmp_user.setNumber(((User) p.getData()).getNumber());
+                        tmp_user.setLat(((User) p.getData()).getLat());
+                        tmp_user.setLon(((User) p.getData()).getLon());
                         Play.UserLocations.setUser(tmp_user);
                         Log.v("LOC", "Host Receiving user info: " + p.getData());
                         break;
@@ -124,7 +126,6 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         Play.powerUpDecider.storedPowerUpList.add(powerIn);
                         long king = 999999999;
                         PowerUp winner =  powerIn;
-                        boolean first = true;
                         for(PowerUp temp : Play.powerUpDecider.storedPowerUpList)
                         {
                             if (temp.getTime()<king) {

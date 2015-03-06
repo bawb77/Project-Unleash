@@ -182,7 +182,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                      Log.v("PORT", "get my user for sending" + UserLocations.getUser(UserLocations.getMyUser()));
 					 if(user != null){
 						 Log.v("PORT", "my user lat: " + user.getLat());
-						 send(USER_CLASS, user);
+						 send(USER_CLASS,user);
 						 Log.v("PORT", "my user data sent");
 					 }
 				 }
@@ -278,7 +278,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		
 		try {
 			//ObjectOutputStream oos = new ObjectOutputStream(os);
-			Log.v("PORT", "try sending my info: (lat: " + this.user.getLat() + ")");
+			Log.v("PORT", "try sending my info: (lat: " + this.user.getLat() + ") " + p.getData());
             Log.v("SOCKC", "ClientDevice " + user.getNumber() + " Sending user info, header: " + header);
 			oos.writeObject(p);
 			Log.v("PORT", "send method: sent");

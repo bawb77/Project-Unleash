@@ -177,8 +177,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void connect(WifiP2pDevice device) {
 
-    final WifiP2pDevice device1 = device;
-    if (device1.status == WifiP2pDevice.AVAILABLE) {
+        final WifiP2pDevice device1 = device;
+        if (device1.status == WifiP2pDevice.AVAILABLE) {
 
         Log.v("P2P", "Connecting to device: " + device.deviceName +
                 " with address: " + device.deviceAddress);
@@ -203,7 +203,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        connect(device1);
+                        if(device1.status != 1)
+                            connect(device1);
                     }
                 }, 1000);
             }
@@ -229,6 +230,15 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                                 Log.v("P2P", "Has DeviceService started yet: " + deviceServiceStarted);
                                 startClientDeviceService(info);
                             }
+                        }
+                        else{
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    createGroupLogic();
+                                }
+                            }, 1000);
                         }
                     }
                 });

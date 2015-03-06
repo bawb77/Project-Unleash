@@ -5,6 +5,9 @@ package ca.drsystems.unleash;
  * This is a static class used to hold information
  * for each user in the game.
  */
+
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 
 public class User implements Serializable{
@@ -49,6 +52,10 @@ public class User implements Serializable{
     public void setNumber(int n){
         this.number = n;
     }
+
+    public LatLng getLatLng(){
+        LatLng temp = new LatLng(this.lat,this.lon);
+        return temp;}
 
     public String toString(){
         String ret = "";

@@ -120,6 +120,19 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         Log.v("LOC", "Host Receiving user info: " + p.getData());
                         break;
                     case POWER_UP:
+                        PowerUp powerIn = (PowerUp)p.getData();
+                        Play.powerUpDecider.storedPowerUpList.add(powerIn);
+                        long king = 999999999;
+                        PowerUp winner =  powerIn;
+                        boolean first = true;
+                        for(PowerUp temp : Play.powerUpDecider.storedPowerUpList)
+                        {
+                            if (temp.getTime()<king) {
+                                king = temp.getTime();
+                                winner = temp;
+                            }
+                        }
+                        PlayAct.hostService.sendToAll(POWER_UP,winner);
                         break;
                     case UNLEASH_D:
                         break;

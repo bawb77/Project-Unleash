@@ -138,7 +138,18 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                         UserLocations.setUser(tmp_user);
                     break;
                 case POWER_UP:
-                    //place powerup on map
+                    PowerUp powerIn = (PowerUp)p.getData();
+                    if(powerIn.status){
+                        PlayAct.removePowerUp(powerIn.getPowerNum());
+                        if(powerIn.getPlayer() == UserLocations.getMyUser())
+                        {
+                            PlayAct.increasePowerLevel();
+                        }
+                    }
+                    else{
+                        PlayAct.makePowerUp(powerIn.getPowerNum(),powerIn.getLatLng());
+                    }
+
                     break;
                 case UNLEASH_D:
                     //release unleash direction blast

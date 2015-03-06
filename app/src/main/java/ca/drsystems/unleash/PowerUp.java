@@ -1,5 +1,7 @@
 package ca.drsystems.unleash;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 
 /**
@@ -10,15 +12,22 @@ public class PowerUp implements Serializable {
     private double lat, lon;
     long time;
     private int powerNum, player;
+    boolean status;
     final int id = 252;
 
-    public PowerUp(double lat, double lon, int powerNum, int player)
+    public PowerUp(double lat, double lon, int powerNum, int player, boolean status)
     {
         this.lat = lat;
         this.lon = lon;
         this.powerNum = powerNum;
         this.player = player;
+        this.status = status;
         this.time = System.currentTimeMillis();
+    }
+    public PowerUp(int powerNum, int player, boolean status){
+        this.powerNum = powerNum;
+        this.player = player;
+        this.status = status;
     }
     public double getLat()
     {
@@ -37,4 +46,8 @@ public class PowerUp implements Serializable {
         return player;
     }
     public long getTime(){return time;}
+    public LatLng getLatLng(){
+        LatLng temp = new LatLng(this.lat,this.lon);
+        return temp;
+    }
 }

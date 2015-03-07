@@ -12,6 +12,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.Bundle;
@@ -71,6 +73,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             .setInterval(500);
     GoogleApiClient myGoogleApiClient;
 
+    final HashMap<String, String> buddies = new HashMap<String, String>();
     HostService hostService;
     Channel mChannel;
     Context context;
@@ -79,6 +82,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
     WifiP2pServiceInfo serviceInfo;
+    WifiP2pDnsSdServiceRequest serviceRequest;
     WifiP2pInfo gInfo;
     MarkerOptions markopt;
     Handler handler;
@@ -298,10 +302,80 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     }
 
+    private void startRegistration(){
+        Map record = new HashMap();
+        record.put("listenport", String.valueOf(12345));
+        record.put("buddyname", "Unleash" + (int) (Math.random() * 1000));
+        record.put("available", "visible");
+
+        // Service information.  Pass it an instance name, service type
+        // _protocol._transportlayer , and the map containing
+        // information other devices will want once they connect to this one.
+        WifiP2pDnsSdServiceInfo serviceInfo =
+                WifiP2pDnsSdServiceInfo.newInstance("_Unleash", "_presence._tcp", record);
+
+        // Add the local service, sending the service info, network channel,
+        // and listener that will be used to indicate success or failure of
+        // the request.
+        mManager.addLocalService(mChannel, serviceInfo, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.v("P2P", "Added Local Service, starting DiscoverService()");
+
+                discoverService();
+
+            }
+
+            @Override
+            public void onFailure(int arg0) {
+                Log.v("P2P", "Could not add local service " + arg0);
+            }
+        });
+    }
+
+
+    private void discoverService() {
+
+        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+            @Override
+        /* Callback includes:
+         * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
+         * record: TXT record dta as a map of key/value pairs.
+         * device: The device running the advertised service.
+         */
+            public void onDnsSdTxtRecordAvailable(
+                    String fullDomain, Map record, WifiP2pDevice device) {
+                buddies.put(device.deviceAddress, record.get("buddyname").toString());
+                Log.d("P2P", "DnsSdTxtRecord available -" + record.toString());
+            }
+        };
+
+        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+            @Override
+            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+                                                WifiP2pDevice resourceType) {
+
+                // Update the device name with the human-friendly version from
+                // the DnsTxtRecord, assuming one arrived.
+                resourceType.deviceName = buddies
+                        .containsKey(resourceType.deviceAddress) ? buddies
+                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+
+                Log.d("P2P", "onDnsSdServiceAvailable " + instanceName);
+            }
+        };
+        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
+
+        Log.v("P2P", "mManager has setDnsSdResponseListeners, starting initializeDiscover()");
+        initializeDiscovery();
+    }
+
+
     private void initializeDiscovery() {
 
-        mManager.addServiceRequest(mChannel,
-                WifiP2pServiceRequest.newInstance(serviceInfo.SERVICE_TYPE_VENDOR_SPECIFIC),
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+
+        mManager.addServiceRequest(mChannel, serviceRequest,
                 new ActionListener() {
                     @Override
                     public void onSuccess() {
@@ -357,6 +431,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             }
         });
     }
+
+
     public void letsPlay(boolean readyTemp, ToggleButton r) {
 
         if(host)
@@ -622,7 +698,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         registerReceiver(receiver, intentFilter);
         Log.v("P2P", "WifiDirectBroadcastReceiver registered");
 
-        initializeDiscovery();
+        startRegistration();
+
+        //initializeDiscovery();
     }
 
 
@@ -646,6 +724,28 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     @Override
     public void onDestroy() {
+        mManager.stopPeerDiscovery(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                // initiate clearing of the all service requests
+                mManager.clearServiceRequests(mChannel, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        // reset the service listeners, service requests, and discovery
+                        initializeDiscovery();
+                    }
+                    @Override
+                    public void onFailure(int i) {
+                        Log.d("P2P", "FAILED to clear service requests ");
+                    }
+                });
+            }
+            @Override
+            public void onFailure(int i) {
+                Log.d("P2P", "FAILED to stop discovery");
+            }
+        });
+
         mManager.removeGroup(mChannel, new ActionListener() {
             @Override
             public void onSuccess() {

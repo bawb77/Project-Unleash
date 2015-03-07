@@ -223,7 +223,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                 o = ois.readObject();
 
                 UnleashPackage p = (UnleashPackage)o;
-                Log.v("SOCKC", "Client " + user.getNumber() + " Received object" + p.getHeader());
+                Log.v("SOCKC", "Client " + user.getNumber() + " Received object" + p.getHeader() + " with data " + p.getData());
 
                 return p;
             }

@@ -43,7 +43,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -410,7 +409,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         test.setVisible(true);
         powerUpList.put(marker_id, test);
         powerUpListCircle.put(marker_id, GetMarkerBounds(test));
-        powerUpDecider.storedPowerUpList.add(marker_id,null);
         return marker_id;
     }
     public void checkLocation(User u)
@@ -737,10 +735,5 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             myUser = i;
             Log.v("UL", "UserLocations setMyUser: " + myUser);
         }
-    }
-    public static class powerUpDecider
-    {
-        static List<PowerUp> storedPowerUpList = new LinkedList<>();
-
     }
 }

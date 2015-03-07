@@ -33,6 +33,8 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     public ObjectOutputStream oos;
     private HashMap<Integer, User> userlist;
     private User tmp_user;
+    private PowerUp tmp_power;
+    private startCondition tmp_stc;
     final int INITIAL_PACKET_NUMBER = 255;
     final int START_CONDITIONS = 254;
     final int USER_CLASS = 253;
@@ -110,9 +112,9 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         });
                         break;
                     case START_CONDITIONS:
-                        startCondition sc = (startCondition) p.getData();
-                        Log.v("PORT","STCON" + sc.getReady());
-                        PlayAct.startCount(sc.getReady());
+                        tmp_stc = (startCondition) p.getData();
+                        Log.v("PORT","STCON" + tmp_stc.getReady());
+                        PlayAct.startCount(tmp_stc.getReady());
                         break;
                     case USER_CLASS:
                         tmp_user.setNumber(((User) p.getData()).getNumber());
@@ -122,18 +124,8 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         Log.v("LOC", "Host Receiving user info: " + p.getData());
                         break;
                     case POWER_UP:
-                        PowerUp powerIn = (PowerUp)p.getData();
-                        Play.powerUpDecider.storedPowerUpList.add(powerIn);
-                        long king = 999999999;
-                        PowerUp winner =  powerIn;
-                        for(PowerUp temp : Play.powerUpDecider.storedPowerUpList)
-                        {
-                            if (temp.getTime()<king) {
-                                king = temp.getTime();
-                                winner = temp;
-                            }
-                        }
-                        PlayAct.hostService.sendToAll(POWER_UP,winner);
+                        tmp_power = (PowerUp)p.getData();
+                        PlayAct.hostService.decider(tmp_power);
                         break;
                     case UNLEASH_D:
                         break;

@@ -37,6 +37,8 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
     final int UNLEASH_C = 251;
     final int UNLEASH_D = 250;
 	private User tmp_user;
+    private PowerUp tmp_power;
+    private startCondition tmp_stc;
 	
 	public ClientDeviceService(Handler handler, Play a, int port, InetAddress s){
 		this.handler = handler;
@@ -119,15 +121,14 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     Log.v("PORT", "Set my user to: " + u);
                     break;
                 case START_CONDITIONS:
-                    startCondition sc = (startCondition) p.getData();
-                    Log.v("PORT","STCON" + sc.getReady());
-                    PlayAct.startingMapCoor(sc.mapSet());
-                    if(sc.getReady())
+                    tmp_stc = (startCondition) p.getData();
+                    Log.v("PORT","STCON" + tmp_stc.getReady());
+                    PlayAct.startingMapCoor(tmp_stc.mapSet());
+                    if(tmp_stc.getReady())
                     {
                         Log.v("PORT","Client Start Game");
                         PlayAct.startGame();
                     }
-
                     break;
                 case USER_CLASS:
                     Log.v("PORT", "package header = User class");
@@ -138,16 +139,16 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                         UserLocations.setUser(tmp_user);
                     break;
                 case POWER_UP:
-                    PowerUp powerIn = (PowerUp)p.getData();
-                    if(powerIn.status){
-                        PlayAct.removePowerUp(powerIn.getPowerNum());
-                        if(powerIn.getPlayer() == UserLocations.getMyUser())
+                    tmp_power = (PowerUp)p.getData();
+                    if(tmp_power.status){
+                        PlayAct.removePowerUp(tmp_power.getPowerNum());
+                        if(tmp_power.getPlayer() == UserLocations.getMyUser())
                         {
                             PlayAct.increasePowerLevel();
                         }
                     }
                     else{
-                        PlayAct.makePowerUp(powerIn.getPowerNum(),powerIn.getLatLng());
+                        PlayAct.makePowerUp(tmp_power.getPowerNum(),tmp_power.getLatLng());
                     }
 
                     break;

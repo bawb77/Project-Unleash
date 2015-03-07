@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HostService extends AsyncTask<Void, Void, String>{
@@ -26,6 +27,12 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	public Socket client;
 	public OutputStream os;
 	public InputStream is;
+    final int INITIAL_PACKET_NUMBER = 255;
+    final int START_CONDITIONS = 254;
+    final int USER_CLASS = 253;
+    final int POWER_UP = 252;
+    final int UNLEASH_C = 251;
+    final int UNLEASH_D = 250;
 
 	//private String message;
 	
@@ -62,6 +69,25 @@ public class HostService extends AsyncTask<Void, Void, String>{
         {
             iter.send(header, o);
         }
+    }
+    public void decider(PowerUp in){
+        powerUpDecider.storedPowerUpList.add(in);
+        long king = 999999999;
+        PowerUp winner =  in;
+        for(PowerUp temp : powerUpDecider.storedPowerUpList)
+        {
+            if (temp.getTime()<king) {
+                king = temp.getTime();
+                winner = temp;
+            }
+        }
+        PlayAct.removePowerUp(winner.getPowerNum());
+        powerUpDecider.storedPowerUpList.clear();
+        sendToAll(POWER_UP,winner);
+    }
+    public static class powerUpDecider
+    {
+        static List<PowerUp> storedPowerUpList = new LinkedList<>();
     }
 
 	@Override

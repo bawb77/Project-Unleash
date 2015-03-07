@@ -39,10 +39,12 @@ public class startCondition implements Serializable {
     {
         return ready;
     }
+    public void getReady(boolean in){this.ready = in;}
     public int getNumber()
     {
         return number;
     }
+    public void setNumber(int in){this.number = in;}
     public LatLngBounds mapSet()
     {
         LatLng NE = new LatLng(xur,yur);

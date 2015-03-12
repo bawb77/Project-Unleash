@@ -108,9 +108,8 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
             int header = p.getHeader();
             switch (header) {
                 case INITIAL_PACKET_NUMBER:
-                    Log.v("PORT", "package header = INITIAL_PACKET_NUMBER --> my own user data");
                     User u = (User) p.getData();
-                    Log.v("PORT", p.getData().toString());
+                    Log.v("PORT", "Initial: " + p.getData());
 
                     this.user.setNumber(u.getNumber());
                     this.user.setName(u.getName());
@@ -122,16 +121,20 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     break;
                 case START_CONDITIONS:
                     tmp_stc = (startCondition) p.getData();
-                    Log.v("PORT","STCON" + tmp_stc.getReady());
-                    PlayAct.startingMapCoor(tmp_stc.mapSet());
-                    if(tmp_stc.getReady())
-                    {
-                        Log.v("PORT","Client Start Game");
-                        PlayAct.startGame();
-                    }
+                    Log.v("PORT","STCON " + tmp_stc.getReady() + ", mapSet(): " + tmp_stc.mapSet());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PlayAct.startingMapCoor(tmp_stc.mapSet());
+                            if(tmp_stc.getReady())
+                            {
+                                Log.v("PORT","Client Start Game");
+                                PlayAct.startGame(PlayAct.findViewById(R.id.readyFrag));
+                            }
+                        }
+                    });
                     break;
                 case USER_CLASS:
-                    Log.v("PORT", "package header = User class");
                     tmp_user = (User) p.getData();
 
                     Log.v("PORT", "Client Receiving setUserLocation for: " + tmp_user.getNumber() + ", Lat: " + tmp_user.getLat());
@@ -162,7 +165,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     break;
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -173,18 +176,15 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	
 	private void SendThread(){
 		while(true){
-		Log.v("PORT", "in sendThread");
-			
-		if(user.getNumber() != INITIAL_PACKET_NUMBER){
-			handler.post(new Runnable(){
-				 @Override
-				 public void run(){
+            if(user.getNumber() != INITIAL_PACKET_NUMBER){
+                handler.post(new Runnable(){
+                     @Override
+                     public void run(){
 					 user = UserLocations.getUser(UserLocations.getMyUser());
-                     Log.v("PORT", "get my user for sending" + UserLocations.getUser(UserLocations.getMyUser()));
 					 if(user != null){
-						 Log.v("PORT", "my user lat: " + user.getLat());
+						 Log.v("PORT", "Sending: " + user);
 						 send(USER_CLASS,user);
-						 Log.v("PORT", "my user data sent");
+						 Log.v("PORT", "Sent: " + user);
 					 }
 				 }
 			 });
@@ -243,17 +243,14 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	}
 	
 	public UnleashPackage receive(){
-		Log.v("PORT", "in receive");
-		
 			try {
 				//ObjectInputStream ois = new ObjectInputStream(is);
 				if(ois.available() == 0){
-					Log.v("PORT", "ois is available");
 					Object o;
 					o = ois.readObject();
 
 					UnleashPackage p = (UnleashPackage)o;
-                    Log.v("PORT", "Client: object received from ois: " + p.getHeader());
+                    Log.v("PORT", "Object received from ois: " + p.getHeader() +  " data " + p.getData());
 					return p;
 				}
 			} catch (ClassNotFoundException e) {
@@ -274,15 +271,12 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	}
 	
 	public void send(int header, Object o){
-		Log.v("PORT", "in send");
 		UnleashPackage p = new UnleashPackage(header, o);
 		
 		try {
-			//ObjectOutputStream oos = new ObjectOutputStream(os);
-			Log.v("PORT", "try sending my info: (lat: " + this.user.getLat() + ") " + p.getData());
-            Log.v("SOCKC", "ClientDevice " + user.getNumber() + " Sending user info, header: " + header);
+			Log.v("PORT", "Sending my packet: " + header + " With data: " + p.getData());
 			oos.writeObject(p);
-			Log.v("PORT", "send method: sent");
+			Log.v("PORT", "Sent my packet: " + header);
 		} catch (IOException e) {
 			Log.v("PORT", "send method: IOException");
 			// TODO Auto-generated catch block

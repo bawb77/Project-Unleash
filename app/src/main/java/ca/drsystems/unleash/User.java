@@ -60,7 +60,7 @@ public class User implements Serializable{
     public String toString(){
         String ret = "";
 
-        ret += number + "#" + name + '#' + lat + '#' + lon;
+        ret += number + "###" + lat + "#" + lon;
 
         return ret;
     }

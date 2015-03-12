@@ -40,7 +40,6 @@ public class HostService extends AsyncTask<Void, Void, String>{
 		this.handler = h;
 		this.PlayAct = a;
 		this.run = false;
-		Log.v("SOCK", "HostService constructor");
 		createSockets();
         User u = new User();
         u.setNumber(0);
@@ -58,15 +57,17 @@ public class HostService extends AsyncTask<Void, Void, String>{
 			Log.v("SOCK", "ServerSocket creation successful.");
 			run = true;
 		} catch (IOException e) {
-			Log.v("SOCK", "IOException HostService.java: in createSockets() trying to create ServerSocket()");
+			Log.v("SOCK", "IOException HostService.java: in createSockets()");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
     public void sendToAll(int header, Object o)
     {
+        Log.v("P2P", "Sending header: " + header + " to all");
         for(ClientService iter : clientServiceList)
         {
+            Log.v("P2P", "SendToAll Sending to " + iter);
             iter.send(header, o);
         }
     }

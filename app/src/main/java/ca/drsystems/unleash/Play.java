@@ -107,6 +107,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+        UserLocations.setMyUser(INITIAL_PACKET_NUMBER);
         myGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -150,8 +151,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         // Indicates this device's details have changed.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-        Log.v("P2P", "Initialized Intents");
     }
 
 
@@ -224,13 +223,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
                     @Override
                     public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                        Log.v("P2P", "Connection Info: " + info);
                         if (info.groupFormed) {
                             if (info.isGroupOwner && !deviceServiceStarted) {
-                                Log.v("SOCK", "Has HostService started yet: " + deviceServiceStarted);
                                 startHostService();
                             } else if (!deviceServiceStarted) {
-                                Log.v("P2P", "Has DeviceService started yet: " + deviceServiceStarted);
                                 startClientDeviceService(info);
                             }
                         }
@@ -251,6 +247,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     private void startHostService(){
         deviceServiceStarted = true;
         host = true;
+        UserLocations.setMyUser(0);
         tCount = 0;
         connected = 0;
         Log.v("SOCK", "Starting HostService");
@@ -270,7 +267,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                     Log.v("SOCK", "DeviceHolder info: " + info);
                     clientDeviceService = new ClientDeviceService(handler, Play.this, 12345, info.groupOwnerAddress);
                     clientDeviceService.execute();
-                    // ready.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
                     Log.v("SOCK", "startClientListener: Exception");
                     e.printStackTrace();
@@ -302,74 +298,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     }
 
-    private void startRegistration(){
-        Map record = new HashMap();
-        record.put("listenport", String.valueOf(12345));
-        record.put("buddyname", "Unleash" + (int) (Math.random() * 1000));
-        record.put("available", "visible");
-
-        // Service information.  Pass it an instance name, service type
-        // _protocol._transportlayer , and the map containing
-        // information other devices will want once they connect to this one.
-        WifiP2pDnsSdServiceInfo serviceInfo =
-                WifiP2pDnsSdServiceInfo.newInstance("_Unleash", "_presence._tcp", record);
-
-        // Add the local service, sending the service info, network channel,
-        // and listener that will be used to indicate success or failure of
-        // the request.
-        mManager.addLocalService(mChannel, serviceInfo, new ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.v("P2P", "Added Local Service, starting DiscoverService()");
-
-                discoverService();
-
-            }
-
-            @Override
-            public void onFailure(int arg0) {
-                Log.v("P2P", "Could not add local service " + arg0);
-            }
-        });
-    }
-
-
-    private void discoverService() {
-
-        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
-            @Override
-        /* Callback includes:
-         * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
-         * record: TXT record dta as a map of key/value pairs.
-         * device: The device running the advertised service.
-         */
-            public void onDnsSdTxtRecordAvailable(
-                    String fullDomain, Map record, WifiP2pDevice device) {
-                buddies.put(device.deviceAddress, record.get("buddyname").toString());
-                Log.d("P2P", "DnsSdTxtRecord available -" + record.toString());
-            }
-        };
-
-        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-            @Override
-            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
-                                                WifiP2pDevice resourceType) {
-
-                // Update the device name with the human-friendly version from
-                // the DnsTxtRecord, assuming one arrived.
-                resourceType.deviceName = buddies
-                        .containsKey(resourceType.deviceAddress) ? buddies
-                        .get(resourceType.deviceAddress) : resourceType.deviceName;
-
-                Log.d("P2P", "onDnsSdServiceAvailable " + instanceName);
-            }
-        };
-        mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener);
-
-        Log.v("P2P", "mManager has setDnsSdResponseListeners, starting initializeDiscover()");
-        initializeDiscovery();
-    }
-
 
     private void initializeDiscovery() {
 
@@ -379,7 +307,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 new ActionListener() {
                     @Override
                     public void onSuccess() {
-                        Log.v("P2P", "Added service!");
+                        Log.v("P2P", "Added service request!");
                     }
 
                     @Override
@@ -433,19 +361,20 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
 
-    public void letsPlay(boolean readyTemp, ToggleButton r) {
+    public void letsPlay(boolean readyTemp, ToggleButton r, View v) {
 
         if(host)
         {
             Log.d("P2P", "***********************HOST SENDS STRCON********************");
             Log.v("P2p", "Counts" + tCount + ":" + connected);
             if(tCount == connected) {
+                Log.v("P2P", "SHOULD BE STARTING NOW FUCK");
                 LatLngBounds temp = mMap.getProjection().getVisibleRegion().latLngBounds;
                 LatLng temp2 = temp.northeast;
                 LatLng temp3 = temp.southwest;
                 startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
                 hostService.sendToAll(START_CONDITIONS, strCon);
-                startGame();
+                startGame(v);
                 startSpawn();
             }
             else
@@ -561,9 +490,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
 
-    public void startGame()
+    public void startGame(View v)
     {
-        findViewById(R.id.joinReadyFrag).setVisibility(View.INVISIBLE);
+        Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
+        findViewById(R.id.readyFrag).setVisibility(View.INVISIBLE);
+        Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
         getUsersInformationThread();
     }
 
@@ -646,7 +577,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             tCount++;
         else if (!in)
             tCount--;
-        Log.v("P2P","tcount" + tCount);
+        Log.v("P2P","tCount " + tCount);
     }
 
 
@@ -654,9 +585,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     {
         ToggleButton r = (ToggleButton)v;
         if(r.isChecked())
-            letsPlay(true, r);
+            letsPlay(true, r, v);
         else if (!r.isChecked())
-            letsPlay(false, r);
+            letsPlay(false, r, v);
     }
 
 
@@ -696,11 +627,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this, peerListListener);
         registerReceiver(receiver, intentFilter);
-        Log.v("P2P", "WifiDirectBroadcastReceiver registered");
 
-        startRegistration();
+        //startRegistration();
 
-        //initializeDiscovery();
+        initializeDiscovery();
     }
 
 
@@ -728,17 +658,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             @Override
             public void onSuccess() {
                 // initiate clearing of the all service requests
-                mManager.clearServiceRequests(mChannel, new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        // reset the service listeners, service requests, and discovery
-                        initializeDiscovery();
-                    }
-                    @Override
-                    public void onFailure(int i) {
-                        Log.d("P2P", "FAILED to clear service requests ");
-                    }
-                });
+
             }
             @Override
             public void onFailure(int i) {
@@ -768,7 +688,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     @Override
     public void onConnected(Bundle bundle) {
         Location location = LocationServices.FusedLocationApi.getLastLocation(myGoogleApiClient);
-        Log.v("P2P", "location" + location);
+        Log.v("P2P", "location " + location);
         LatLng temp = new LatLng(location.getLatitude(),location.getLongitude());
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(temp,19));
     }
@@ -795,7 +715,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i("LOC", "GoogleApiClient connection has failed");
+        Log.v("LOC", "GoogleApiClient connection has failed");
     }
 
 
@@ -807,13 +727,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         public static HashMap<Integer, User> returnList() {
 
-            Log.v("UL", "UserLocations returnList()");
             return userLoc;
         }
 
         public static void setUser(User user) {
 
-            Log.v("UL", "UserLocations setUser()" + user);
             there = false;
             if (user.getNumber() < 250) {
                 userLoc.put(user.getNumber(), user);

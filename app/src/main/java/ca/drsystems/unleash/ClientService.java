@@ -113,7 +113,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         break;
                     case START_CONDITIONS:
                         tmp_stc = (startCondition) p.getData();
-                        Log.v("PORT","STCON" + tmp_stc.getReady());
+                        Log.v("PORT","STRCON " + tmp_stc.getReady());
                         PlayAct.startCount(tmp_stc.getReady());
                         break;
                     case USER_CLASS:
@@ -136,7 +136,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                 }
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -146,24 +146,20 @@ public class ClientService extends AsyncTask<Void, Void, String> {
 
     private void SendThread(){
         while(true){
-            Log.v("SOCKC", "ClientService.java: in SendThread");
             handler.post(new Runnable(){
                 @Override
                 public void run(){
-                    Log.v("SOCKC", "ClientService.java: Getting UserLocations.returnList(), a list of all users");
                     userlist = Play.UserLocations.returnList();
-                    Log.v("SOCKC", "ClientService.java: Userlist size: " + userlist.size());
-                    Log.v("SOCKC", "User Info " + userlist);
+                    Log.v("SOCKC", "Userlist: " + userlist);
 
                     for(User u : userlist.values()){
-                        Log.v("SOCKC", "ClientService.java: Sending user in userlist: " + u.getNumber());
                         tmp_user = new User();
                         tmp_user.setLat(u.getLat());
                         tmp_user.setLon(u.getLon());
                         tmp_user.setName(u.getName());
                         tmp_user.setNumber(u.getNumber());
                         send(USER_CLASS, tmp_user);
-                        Log.v("SOCKC", "ClientService.java: User " + u.getNumber() + "'s info sent");
+                        Log.v("SOCKC", "User " + u.getNumber() + "'s info sent with info: " + tmp_user.getLat());
                     }
                 }
             });
@@ -181,7 +177,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             @Override
             public void run() {
                 try {
-                    Log.v("SOCKC", "Client " + user.getNumber() + " Started ReceiveThread");
+                    Log.v("SOCKC", "Started ReceiveThread for client: " + user.getNumber());
                     ReceiveThread();
                 } catch (Exception e) {
                     Log.v("SOCKC", "Client " + user.getNumber() +
@@ -198,7 +194,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             @Override
             public void run() {
                 try {
-                    Log.v("SOCKC", "Client " + user.getNumber() + " Started SendThread");
+                    Log.v("SOCKC", "Started SendThread for client: " + user.getNumber());
                     SendThread();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -242,14 +238,10 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     }
 
     public void send(int header_code, Object o){
+        UnleashPackage p = new UnleashPackage(header_code, o);
         try {
-            Log.v("SOCKC", "Client " + user.getNumber() +
-                    " Create package, header should be INITIAL_PACKET_NUMBER the first time: " +
-                    header_code);
-            UnleashPackage p;
-
-            Log.v("SOCKC", "Client " + user.getNumber() + " Sending user info, header: " + header_code);
-            p = new UnleashPackage(header_code, o);
+            Log.v("SOCKC", "Client " + user.getNumber() + " Sending user info, header: " +
+                    p.getHeader() + " with data " + p.getData());
 
             oos.writeObject(p);
             Log.v("SOCKC", "Client " + user.getNumber() + " UnleashPacket sent over the OOS");

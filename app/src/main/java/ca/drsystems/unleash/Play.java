@@ -3,6 +3,8 @@ package ca.drsystems.unleash;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -12,10 +14,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
-import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -35,12 +35,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -63,6 +65,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     private Map<Integer, CircleOptions> powerUpListCircle;
     private Map<Integer, Marker> userPosition;
     private boolean isWifiP2pEnabled;
+    public List<Circle> circles;
+    public List<Polyline> rects;
 
     LocationListener locationListener;
 
@@ -78,6 +82,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     Channel mChannel;
     Context context;
     TextView numPlayer;
+    Location userLocation;
     WifiP2pManager mManager;
     WifiDirectBroadcastReceiver receiver;
     PeerListListener peerListListener;
@@ -88,6 +93,12 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     Handler handler;
     LatLngBounds currScreen;
     Random rand;
+    uPowerUp u_PowerUp;
+    uPlayerTracking u_PlayerTracking;
+    private MediaPlayer mPlayer;
+    private SoundPool soundPool;
+    private int explosion_sound;
+    private boolean sound_on;
     boolean deviceServiceStarted;
     boolean host;
     boolean run;
@@ -117,6 +128,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         powerUpList = new HashMap<Integer, Marker>();
         powerUpListCircle = new HashMap<Integer, CircleOptions>();
         userPosition = new HashMap<Integer, Marker>();
+        explosion_sound = soundPool.load(this, R.raw.explosion, 1);
         rand = new Random();
         pCount = 0;
         powerLevel = 0;
@@ -127,14 +139,17 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         context = this;
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
+        uSound u_sound = new uSound(Play.this,mPlayer,soundPool);
+
+        u_sound.startSound();
         initializeIntents();
         createPeerListListener();
         setUpMapIfNeeded();
         joinFragStart();
-
+        u_PowerUp = new uPowerUp(Play.this,mMap,powerUpList,powerUpListCircle,currScreen);
+        u_PlayerTracking = new uPlayerTracking(Play.this,mMap,userPosition);
 
     }
-
     public void joinFragStart() {
         fragmentTransaction.replace(R.id.map, jf).commit();
     }
@@ -375,7 +390,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
                 hostService.sendToAll(START_CONDITIONS, strCon);
                 startGame(v);
-                startSpawn();
+                u_PowerUp.startSpawn();
             }
             else
             {
@@ -390,99 +405,44 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         }
 
     }
-    public void startSpawn()
-    {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
-            @Override
-            public void run() {
-                LatLng rand_point = getRandomPoint();
-                int marker_id = powerUpList.size();
-                makePowerUp(marker_id, rand_point);
-                PowerUp send = new PowerUp(rand_point.latitude,rand_point.longitude,marker_id,UserLocations.getMyUser(),false);
-                hostService.sendToAll(POWER_UP,send);
-                startSpawn();
-            }
-        }, 10000);
-    }
-    public int makePowerUp(int marker_id, LatLng in)
-    {
-        Marker test = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(in.latitude, in.longitude))
-                .title("Human Sacrifice")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.powericon)));
-        test.setVisible(true);
-        powerUpList.put(marker_id, test);
-        powerUpListCircle.put(marker_id, GetMarkerBounds(test));
-        return marker_id;
-    }
-    public void checkLocation(User u)
-    {
-        for(Integer id : powerUpListCircle.keySet()) {
-            PowerUp pTemp = new PowerUp(id, UserLocations.getMyUser(),true);
-            if (IsLocationInCircle(u.getLatLng(), powerUpListCircle.get(id))) {
-                if (host){
-                    increasePowerLevel();
-                    hostService.sendToAll(id, pTemp);}
-                else {
-                    clientDeviceService.send(POWER_UP, pTemp);
-                    removePowerUp(id);
-                }
-            }
+
+    public void unleash(View v){
+        if(host)
+        {
+
+        }else{
+
+        }
+
+        if(powerLevel >= 3){
+            Context context = getApplicationContext();
+            CharSequence text = "UNLEASH";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+
+            // for directional unleash thing.. -.-
+            //getUnleashDirection();
+
+            showUnleashAnimation();
+            powerLevel = -1;
+            u_PowerUp.increasePowerLevel();
+        }else{
+            Context context = getApplicationContext();
+            CharSequence text = "YOUR POWER ISN'T HIGH ENOUGH";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         }
     }
+    private void showUnleashAnimation(){
 
-    public void removePowerUp(int id)
-    {
-        Marker rem_marker = powerUpList.get(id);
-        powerUpList.remove(id);
-        powerUpListCircle.remove(id);
-        rem_marker.remove();
-    }
-    public void increasePowerLevel()
-    {
-        powerLevel++;
+        new AnimateUnleash(Play.this,userLocation, this, powerLevel, true).execute();
+        soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
     }
 
-    private boolean IsLocationInCircle(LatLng location, CircleOptions circle){
-        double lat = Math.abs(location.latitude) - Math.abs(circle.getCenter().latitude);
-        double lon = Math.abs(location.longitude) - Math.abs(circle.getCenter().longitude);
-
-        double diff = Math.sqrt((Math.pow(Math.abs(lat), 2)) + Math.pow(Math.abs(lon), 2));
-
-        if(diff < circle.getRadius()){
-            return true;
-        } else{
-            return false;
-        }
-    }
-    private CircleOptions GetMarkerBounds(Marker marker){
-        double meters = 0.00003;
-
-        CircleOptions circle_opt = new CircleOptions();
-        circle_opt.center(marker.getPosition());
-        circle_opt.radius(meters);
-
-        return circle_opt;
-    }
-    private LatLng getRandomPoint(){
-        LatLng rand_point = null;
-
-        LatLng ne = currScreen.northeast;
-        LatLng sw = currScreen.southwest;
-
-        double upper_lat = sw.latitude;
-        double lower_lat = ne.latitude;
-        double upper_lon = ne.longitude;
-        double lower_lon = sw.longitude;
-
-        double latitude = rand.nextDouble() * (upper_lat - lower_lat) + lower_lat;
-        double longitude = rand.nextDouble() * (upper_lon - lower_lon) + lower_lon;
-
-        rand_point = new LatLng(latitude, longitude);
-
-        return rand_point;
-    }
 
     public void startLocationRequest(){
         LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -495,73 +455,40 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
         findViewById(R.id.readyFrag).setVisibility(View.INVISIBLE);
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
-        getUsersInformationThread();
+        u_PlayerTracking.getUsersInformationThread();
     }
-
-    public void getUsersInformationThread()
-    {
-        while(run)
+    public Circle addCircle(CircleOptions circle){
+        HashMap<Integer, User> killUsers = UserLocations.returnList();
+        for(User u : killUsers.values())
         {
-            HashMap<Integer, User> users = UserLocations.returnList();
-            for(final User u : users.values()){
-                Log.v("ALC2", "user: " + u.getNumber() + " Loc: " + u.getLat());
-                if(u.getLat() != 0.0){
-                    if(u.getNumber() != UserLocations.getMyUser()){
-                        Log.v("ALC2", "create marker for user: " + u.getNumber());
-                        markopt = new MarkerOptions();
-                        switch(u.getNumber())
-                        {
-                            case 0:
-                                markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon3 ));
-                                break;
-                            case 1:
-                                markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon1 ));
-                                break;
-                            case 2:
-                                markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon2 ));
-                                break;
-                            case 3:
-                                markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon4 ));
-                                break;
-                            default:
-                                markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon3 ));
-                                break;
-                        }
-                        Log.v("ALC2", "Marker created for: " + u.getNumber() + " at: " + u.getLat() + ", " + u.getLon());
-
-                        handler.post(new Runnable(){
-                            @Override
-                            public void run() {
-                                // TODO Auto-generated method stub
-                                addUserMarker(markopt, u.getNumber());
-                            }
-                        });
-                    }
-                } else{
-                    Log.v("ALC2", "marker not created: user " + u.getNumber() + "lat is 0.0!");
-                }
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            if(IsLocationInCircle(u.getLatLng(),circle)){
+                if(host)
+                    u.setAlive(false);
             }
         }
+
+        Circle circle_tmp = mMap.addCircle(circle);
+        circles.add(circle_tmp);
+        return circle_tmp;
     }
-    public void addUserMarker(MarkerOptions in, Integer inNum)
-    {
-        Marker new_mark = mMap.addMarker(markopt);
-        Log.v("ALC2", "Marker Added");
-        if(userPosition.containsKey(inNum))
-        {
-            Marker curr_mark = userPosition.get(inNum);
-            curr_mark.remove();
-            userPosition.remove(inNum);
-            Log.v("ALC", "Marker removed");
+    public boolean IsLocationInCircle(LatLng location, CircleOptions circle){
+        double lat = Math.abs(location.latitude) - Math.abs(circle.getCenter().latitude);
+        double lon = Math.abs(location.longitude) - Math.abs(circle.getCenter().longitude);
+
+        double diff = Math.sqrt((Math.pow(Math.abs(lat), 2)) + Math.pow(Math.abs(lon), 2));
+
+        if(diff < circle.getRadius()){
+            return true;
+        } else{
+            return false;
         }
-        userPosition.put(inNum, new_mark);
+    }
+    public void removeCircle(Circle circle){
+        circle.remove();
+    }
+    public Polyline addRect(PolylineOptions poly){
+        Polyline polyline = mMap.addPolyline(poly);
+        return polyline;
     }
 
     public void startingMapCoor(LatLngBounds in)
@@ -570,16 +497,14 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         currScreen = in;
     }
 
-
     public void startCount(boolean in)
     {
         if(in)
             tCount++;
         else if (!in)
             tCount--;
-        Log.v("P2P","tCount " + tCount);
+        Log.v("P2P", "tCount " + tCount);
     }
-
 
     public void toggleButton(View v)
     {
@@ -589,7 +514,6 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         else if (!r.isChecked())
             letsPlay(false, r, v);
     }
-
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
@@ -623,6 +547,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     @Override
     protected void onResume() {
         super.onResume();
+        if(sound_on){
+            mPlayer.start();
+        }
         setUpMapIfNeeded();
 
         receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this, peerListListener);
@@ -650,7 +577,15 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         });
         super.onPause();
     }
-
+    @Override
+    protected void onStop() {
+        if(sound_on){
+            mPlayer.pause();
+        }
+        run = false;
+        // TODO Auto-generated method stub
+        super.onStop();
+    }
 
     @Override
     public void onDestroy() {
@@ -700,6 +635,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     @Override
     public void onLocationChanged(Location location) {
+        userLocation = location;
         if(UserLocations.getMyUser() != INITIAL_PACKET_NUMBER) {
             User u = UserLocations.getUser(UserLocations.getMyUser());
             Log.v("LOC", "Setting user: " + UserLocations.getMyUser() + "'s location to: " + location);
@@ -709,7 +645,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             UserLocations.setUser(u);
             if(deviceServiceStarted)
             {
-                checkLocation(u);
+                u_PowerUp.checkLocation(u);
             }
         }
     }

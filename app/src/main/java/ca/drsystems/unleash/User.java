@@ -14,6 +14,7 @@ public class User implements Serializable{
 
     private static final long serialVersionUID = 43L;
     private double lat, lon;
+    private boolean alive;
     private String name;
     private int number;
     final int id = 253;
@@ -22,6 +23,9 @@ public class User implements Serializable{
     public User(){
 
     }
+    public boolean getAlive(){return this.alive;}
+
+    public void setAlive(boolean in){this.alive = in;}
 
     public double getLat(){ return this.lat; }
 

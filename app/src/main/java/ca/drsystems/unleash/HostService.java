@@ -43,6 +43,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
 		createSockets();
         User u = new User();
         u.setNumber(0);
+        u.setAlive(true);
         Play.UserLocations.setMyUser(0);
         Play.UserLocations.setUser(u);
         clientServiceList = new ArrayList<ClientService>();
@@ -82,7 +83,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
                 winner = temp;
             }
         }
-        PlayAct.removePowerUp(winner.getPowerNum());
+        PlayAct.u_PowerUp.removePowerUp(winner.getPowerNum());
         powerUpDecider.storedPowerUpList.clear();
         sendToAll(POWER_UP,winner);
     }

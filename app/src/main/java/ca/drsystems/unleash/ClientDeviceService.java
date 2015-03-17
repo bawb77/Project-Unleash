@@ -115,6 +115,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     this.user.setName(u.getName());
                     this.user.setLat(u.getLat());
                     this.user.setLon(u.getLon());
+                    this.user.setAlive(true);
                     UserLocations.setMyUser(user.getNumber());
                     UserLocations.setUser(u);
                     Log.v("PORT", "Set my user to: " + u);
@@ -144,14 +145,14 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                 case POWER_UP:
                     tmp_power = (PowerUp)p.getData();
                     if(tmp_power.status){
-                        PlayAct.removePowerUp(tmp_power.getPowerNum());
+                        PlayAct.u_PowerUp.removePowerUp(tmp_power.getPowerNum());
                         if(tmp_power.getPlayer() == UserLocations.getMyUser())
                         {
-                            PlayAct.increasePowerLevel();
+                            PlayAct.u_PowerUp.increasePowerLevel();
                         }
                     }
                     else{
-                        PlayAct.makePowerUp(tmp_power.getPowerNum(),tmp_power.getLatLng());
+                        PlayAct.u_PowerUp.makePowerUp(tmp_power.getPowerNum(),tmp_power.getLatLng());
                     }
 
                     break;

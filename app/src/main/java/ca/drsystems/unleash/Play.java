@@ -407,27 +407,25 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
     public void unleash(View v){
-        if(host)
-        {
-
-        }else{
-
-        }
-
         if(powerLevel >= 3){
-            Context context = getApplicationContext();
-            CharSequence text = "UNLEASH";
-            int duration = Toast.LENGTH_SHORT;
+            if(host)
+            {
+                Context context = getApplicationContext();
+                CharSequence text = "UNLEASH";
+                int duration = Toast.LENGTH_SHORT;
 
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+                showUnleashAnimation();
+                UnleashAttack attack = new UnleashAttack(UserLocations.getMyUser(),powerLevel,userLocation.getLatitude(),userLocation.getLongitude());
+                hostService.sendToAll(UNLEASH_C,attack);
+                u_PowerUp.decreasePowerLevel();
 
-            // for directional unleash thing.. -.-
-            //getUnleashDirection();
-
-            showUnleashAnimation();
-            powerLevel = -1;
-            u_PowerUp.increasePowerLevel();
+            }else{
+                UnleashAttack attack = new UnleashAttack(UserLocations.getMyUser(),powerLevel,userLocation.getLatitude(),userLocation.getLongitude());
+                clientDeviceService.send(UNLEASH_C,attack);
+                u_PowerUp.decreasePowerLevel();
+            }
         }else{
             Context context = getApplicationContext();
             CharSequence text = "YOUR POWER ISN'T HIGH ENOUGH";
@@ -439,7 +437,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
     private void showUnleashAnimation(){
 
-        new AnimateUnleash(Play.this,userLocation, this, powerLevel, true).execute();
+        LatLng temp = new LatLng(userLocation.getLatitude(),userLocation.getLongitude());
+        new AnimateUnleash(Play.this,temp, this, powerLevel, true).execute();
         soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
     }
 
@@ -458,19 +457,41 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         u_PlayerTracking.getUsersInformationThread();
     }
     public Circle addCircle(CircleOptions circle){
-        HashMap<Integer, User> killUsers = UserLocations.returnList();
-        for(User u : killUsers.values())
+        if(host)
         {
-            if(IsLocationInCircle(u.getLatLng(),circle)){
-                if(host)
-                    u.setAlive(false);
+            HashMap<Integer, User> killUsers = UserLocations.returnList();
+            for(User u : killUsers.values())
+            {
+                if(IsLocationInCircle(u.getLatLng(),circle) && u.getNumber() != UserLocations.getMyUser()){
+                    if(host)
+                    {
+                        u.setAlive(false);
+                        checkVictory();
+                    }
+                }
             }
         }
-
         Circle circle_tmp = mMap.addCircle(circle);
         circles.add(circle_tmp);
         return circle_tmp;
     }
+    private void checkVictory()
+    {
+        HashMap<Integer, User> countUsers = UserLocations.returnList();
+        int aliveCount =0;
+        for(User u : countUsers.values())
+        {
+            if(u.getAlive())
+            {
+                aliveCount++;
+            }
+        }
+        if(aliveCount == 1)
+        {
+            //end game screen call goes here
+        }
+    }
+
     public boolean IsLocationInCircle(LatLng location, CircleOptions circle){
         double lat = Math.abs(location.latitude) - Math.abs(circle.getCenter().latitude);
         double lon = Math.abs(location.longitude) - Math.abs(circle.getCenter().longitude);

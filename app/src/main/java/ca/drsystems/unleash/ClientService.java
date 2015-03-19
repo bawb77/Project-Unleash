@@ -35,6 +35,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     private User tmp_user;
     private PowerUp tmp_power;
     private startCondition tmp_stc;
+    private UnleashAttack tmp_unleash_c;
     final int INITIAL_PACKET_NUMBER = 255;
     final int START_CONDITIONS = 254;
     final int USER_CLASS = 253;
@@ -130,6 +131,9 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                     case UNLEASH_D:
                         break;
                     case UNLEASH_C:
+                        tmp_unleash_c = (UnleashAttack)p.getData();
+                        new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(), PlayAct,tmp_unleash_c.getPowerLvl(), true).execute();
+                        PlayAct.hostService.sendToAll(UNLEASH_C,tmp_unleash_c);
                         break;
                     default :
                         break;

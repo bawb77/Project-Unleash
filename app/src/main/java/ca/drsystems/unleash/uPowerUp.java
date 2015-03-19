@@ -93,6 +93,10 @@ public class uPowerUp {
         playAct.powerLevel++;
         // power.setText("Power: " + powerLevel);
     }
+    public void decreasePowerLevel(){
+        playAct.powerLevel = 0;
+    }
+
     private LatLng getRandomPoint(){
         LatLng rand_point = null;
 

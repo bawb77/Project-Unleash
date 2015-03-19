@@ -1,7 +1,6 @@
 package ca.drsystems.unleash;
 
 import android.graphics.Color;
-import android.location.Location;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.model.Circle;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
  * Created by BBaxter3160 on 3/16/2015.
  */
 public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
-    Location location;
+    LatLng location;
     Play playAct;
     CircleOptions circle;
     Circle rem_circle;
@@ -26,7 +25,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     Integer pic_num;
     boolean explosion_cir;
 
-    public AnimateUnleash(Play PlayAct, Location location, Play act, int power, boolean circle_expl) {
+    public AnimateUnleash(Play PlayAct, LatLng location, Play act, int power, boolean circle_expl) {
         this.playAct = PlayAct;
         this.location = location;
         playAct.circles = new ArrayList<Circle>();
@@ -41,7 +40,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     }
     private void createCircle(int meters, int color){
         circle = new CircleOptions();
-        circle.center(new LatLng(location.getLatitude(), location.getLongitude()));
+        circle.center(new LatLng(location.latitude, location.longitude));
         circle.radius(meters);
         circle.fillColor(color);
         circle.strokeColor(0x00000000);
@@ -54,8 +53,8 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
         });
     }
     private void createRect(){
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
+        double lat = location.latitude;
+        double lon = location.longitude;
 
         // Instantiates a new Polyline object and adds points to define a rectangle
         rect = new PolylineOptions()

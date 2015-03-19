@@ -1,5 +1,7 @@
 package ca.drsystems.unleash;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by BBaxter3160 on 2/16/2015.
  */
@@ -23,4 +25,8 @@ public class UnleashAttack {
     public double getLat(){return lat;}
     public double getLon(){return lon;}
     public long getTime(){return time;}
+    public LatLng getLocation(){
+        LatLng temp = new LatLng(lat,lon);
+        return temp;
+    }
 }

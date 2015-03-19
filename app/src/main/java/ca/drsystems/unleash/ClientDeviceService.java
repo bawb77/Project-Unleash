@@ -39,6 +39,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	private User tmp_user;
     private PowerUp tmp_power;
     private startCondition tmp_stc;
+    private UnleashAttack tmp_unleash_c;
 	
 	public ClientDeviceService(Handler handler, Play a, int port, InetAddress s){
 		this.handler = handler;
@@ -160,7 +161,8 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     //release unleash direction blast
                     break;
                 case UNLEASH_C:
-                    //release unleash circular blast.
+                    tmp_unleash_c = (UnleashAttack)p.getData();
+                    new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(), PlayAct,tmp_unleash_c.getPowerLvl(), true).execute();
                     break;
                 default:
                     break;

@@ -132,11 +132,16 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         setUpMapIfNeeded();
         joinFragStart();
 
-
     }
 
     public void joinFragStart() {
-        fragmentTransaction.replace(R.id.map, jf).commit();
+        //try .add(R.id.map, jf)
+        Log.v("#########", "joinFragStart(): R.id.readyFrag: " + R.id.readyFrag);
+        Log.v("#########", "joinFragStart(): jf.getId(): " + jf.getId());
+        Log.v("#########", "joinFragStart(): MAP ID: " + R.id.map);
+        fragmentTransaction.add(R.id.readyFrag, jf).commit();
+        Log.v("#########", "joinFragStart(): jf.getId(): " + jf.getId());
+        Log.v("#########", "joinFragStart(): MAP ID: " + R.id.map);
     }
 
     public void initializeIntents() {
@@ -285,6 +290,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
+            Log.v("#########", "setUpMapIfNeeded(): MAP ID: " + R.id.map);
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
@@ -363,6 +369,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void letsPlay(boolean readyTemp, ToggleButton r, View v) {
 
+        Log.v("#########", "letsPlay(): jf.getId(): " + jf.getId());
+        Log.v("#########", "LetsPlay(): MAP ID: " + R.id.map);
         if(host)
         {
             Log.d("P2P", "***********************HOST SENDS STRCON********************");
@@ -492,9 +500,21 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void startGame(View v)
     {
-        Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
-        findViewById(R.id.readyFrag).setVisibility(View.INVISIBLE);
-        Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
+        Log.v("#########", "startGame(): R.id.readyFrag: " + R.id.readyFrag);
+        Log.v("#########", "startGame(): jf.getId(): " + jf.getId());
+        Log.v("#########", "startGame(): MAP ID: " + R.id.map);
+        //FragmentTransaction ft = fragmentManager.beginTransaction();
+        //ft.replace(R.id.readyFrag, getSupportFragmentManager().findFragmentById(R.id.map)).commit();
+        //Try saving id when jf is created
+        findViewById(R.id.readyFrag).setVisibility(View.GONE);
+        //jf.onDestroyView();
+        //findViewById(jf.getId()).invalidate();
+        //jf.getView().setVisibility(View.GONE);
+//        ft.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+//                .show(getSupportFragmentManager().findFragmentById(R.id.map))
+//                .commit();
+
+        Log.v("OK", "##########VISIBILITY: " + findViewById(jf.getId()).getVisibility());
         getUsersInformationThread();
     }
 
@@ -504,7 +524,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         {
             HashMap<Integer, User> users = UserLocations.returnList();
             for(final User u : users.values()){
-                Log.v("ALC2", "user: " + u.getNumber() + " Loc: " + u.getLat());
+                //Log.v("ALC2", "user: " + u.getNumber() + " Loc: " + u.getLat());
                 if(u.getLat() != 0.0){
                     if(u.getNumber() != UserLocations.getMyUser()){
                         Log.v("ALC2", "create marker for user: " + u.getNumber());

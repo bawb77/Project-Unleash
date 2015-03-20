@@ -52,7 +52,7 @@ public class HostService extends AsyncTask<Void, Void, String>{
 	private void createSockets(){
 		// create Socket for Server
 		try {
-			Log.v("SOCK", "Try to create ServerSocket on port: " + PORT);
+			//Log.v("SOCK", "Try to create ServerSocket on port: " + PORT);
 			server = new ServerSocket(PORT);
 			Log.v("SOCK", "ServerSocket creation successful.");
 			run = true;

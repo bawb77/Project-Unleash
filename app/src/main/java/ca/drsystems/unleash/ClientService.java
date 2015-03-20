@@ -55,10 +55,10 @@ public class ClientService extends AsyncTask<Void, Void, String> {
         this.is = is;
         this.os = os;
 
-        Log.v("SOCKC", "NEW CLIENT| Client Number: " + user.getNumber());
+       // Log.v("SOCKC", "NEW CLIENT| Client Number: " + user.getNumber());
         try {
             ois = new ObjectInputStream(is);
-            Log.v("SOCKC", "Client " + user.getNumber() + " constructor: OIS");
+           // Log.v("SOCKC", "Client " + user.getNumber() + " constructor: OIS");
         } catch (StreamCorruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -68,7 +68,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
         }
         try {
             oos = new ObjectOutputStream(os);
-            Log.v("SOCKC", "Client " + user.getNumber() + " constructor: OOS");
+           // Log.v("SOCKC", "Client " + user.getNumber() + " constructor: OOS");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -79,14 +79,14 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     }
 
     private void sendUserInfoFirst(){
-        Log.v("SOCKC", "Client " + user.getNumber() + " Sending initial packet");
+        //Log.v("SOCKC", "Client " + user.getNumber() + " Sending initial packet");
         send(INITIAL_PACKET_NUMBER, user);
         run = true;
     }
 
     private void ReceiveThread(){
         while(true){
-            Log.v("SOCKC", "Client " + user.getNumber() + " Calling receive()");
+            //Log.v("SOCKC", "Client " + user.getNumber() + " Calling receive()");
             UnleashPackage p = receive();
 
             if(p != null){
@@ -121,7 +121,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         tmp_user.setLat(((User) p.getData()).getLat());
                         tmp_user.setLon(((User) p.getData()).getLon());
                         Play.UserLocations.setUser(tmp_user);
-                        Log.v("LOC", "Host Receiving user info: " + p.getData());
+                        //Log.v("LOC", "Host Receiving user info: " + p.getData());
                         break;
                     case POWER_UP:
                         tmp_power = (PowerUp)p.getData();
@@ -150,7 +150,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                 @Override
                 public void run(){
                     userlist = Play.UserLocations.returnList();
-                    Log.v("SOCKC", "Userlist: " + userlist);
+                    //Log.v("SOCKC", "Userlist: " + userlist);
 
                     for(User u : userlist.values()){
                         tmp_user = new User();
@@ -159,7 +159,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         tmp_user.setName(u.getName());
                         tmp_user.setNumber(u.getNumber());
                         send(USER_CLASS, tmp_user);
-                        Log.v("SOCKC", "User " + u.getNumber() + "'s info sent with info: " + tmp_user.getLat());
+                        //Log.v("SOCKC", "User " + u.getNumber() + "'s info sent with info: " + tmp_user.getLat());
                     }
                 }
             });
@@ -177,11 +177,11 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             @Override
             public void run() {
                 try {
-                    Log.v("SOCKC", "Started ReceiveThread for client: " + user.getNumber());
+                   // Log.v("SOCKC", "Started ReceiveThread for client: " + user.getNumber());
                     ReceiveThread();
                 } catch (Exception e) {
-                    Log.v("SOCKC", "Client " + user.getNumber() +
-                            " Exception starting ReceiveThread");
+                    //Log.v("SOCKC", "Client " + user.getNumber() +
+                           // " Exception starting ReceiveThread");
                     e.printStackTrace();
                 }
             }
@@ -194,7 +194,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             @Override
             public void run() {
                 try {
-                    Log.v("SOCKC", "Started SendThread for client: " + user.getNumber());
+                    //Log.v("SOCKC", "Started SendThread for client: " + user.getNumber());
                     SendThread();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -244,7 +244,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                     p.getHeader() + " with data " + p.getData());
 
             oos.writeObject(p);
-            Log.v("SOCKC", "Client " + user.getNumber() + " UnleashPacket sent over the OOS");
+            //Log.v("SOCKC", "Client " + user.getNumber() + " UnleashPacket sent over the OOS");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

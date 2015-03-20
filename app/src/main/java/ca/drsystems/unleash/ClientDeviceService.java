@@ -48,7 +48,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		this.server = s;
 		this.user = new User();
 		this.user.setNumber(INITIAL_PACKET_NUMBER);
-		Log.v("ALC", "in ClientDeviceService");
+		//Log.v("ALC", "in ClientDeviceService");
 		createSocketThread();
 	}
 	private void createSocketThread()
@@ -68,10 +68,10 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	}
 	
 	private void createSocket(){
-		Log.v("ALC", "in createSocket");
+		//Log.v("ALC", "in createSocket");
 		while(!socket_done){
 		try {
-			Log.v("PORT", "creating server socket in client: " + server);
+			//Log.v("PORT", "creating server socket in client: " + server);
 			client = new Socket(server, PORT);
 			Log.v("PORT", "server socket created!");
 			os = client.getOutputStream();
@@ -79,7 +79,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 			is = client.getInputStream();
 			ois = new ObjectInputStream(is);
 			socket_done = true;
-			Log.v("PORT", "socket creation done with oos and ois");
+			//Log.v("PORT", "socket creation done with oos and ois");
 		} catch (UnknownHostException e) {
 			Log.v("PORT", "UnknownHostException from new Socket(server)");
 			// TODO Auto-generated catch block
@@ -101,15 +101,15 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	
 	private void ReceiveThread() {
         while (true) {
-            Log.v("PORT", "in receiveThread");
+            //Log.v("PORT", "in receiveThread");
             UnleashPackage p = receive();
-            Log.v("PORT", "received package from host");
+           // Log.v("PORT", "received package from host");
 
             int header = p.getHeader();
             switch (header) {
                 case INITIAL_PACKET_NUMBER:
                     User u = (User) p.getData();
-                    Log.v("PORT", "Initial: " + p.getData());
+                   // Log.v("PORT", "Initial: " + p.getData());
 
                     this.user.setNumber(u.getNumber());
                     this.user.setName(u.getName());
@@ -128,7 +128,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                             PlayAct.startingMapCoor(tmp_stc.mapSet());
                             if(tmp_stc.getReady())
                             {
-                                Log.v("PORT","Client Start Game");
+                                //Log.v("PORT","Client Start Game");
                                 PlayAct.startGame(PlayAct.findViewById(R.id.readyFrag));
                             }
                         }
@@ -182,9 +182,9 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                      public void run(){
 					 user = UserLocations.getUser(UserLocations.getMyUser());
 					 if(user != null){
-						 Log.v("PORT", "Sending: " + user);
+						 //Log.v("PORT", "Sending: " + user);
 						 send(USER_CLASS,user);
-						 Log.v("PORT", "Sent: " + user);
+						 //Log.v("PORT", "Sent: " + user);
 					 }
 				 }
 			 });
@@ -211,7 +211,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 			}
 		}
 		
-		Log.v("PORT", "start ReceiveThread");
+		//Log.v("PORT", "start ReceiveThread");
 		Thread thread = new Thread(new Runnable(){
 		    @Override
 		    public void run() {
@@ -225,7 +225,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		
 		thread.start();
 		
-		Log.v("PORT", "start SendThread");
+		//Log.v("PORT", "start SendThread");
 		Thread thread2 = new Thread(new Runnable(){
 		    @Override
 		    public void run() {
@@ -276,7 +276,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 		try {
 			Log.v("PORT", "Sending my packet: " + header + " With data: " + p.getData());
 			oos.writeObject(p);
-			Log.v("PORT", "Sent my packet: " + header);
+			//Log.v("PORT", "Sent my packet: " + header);
 		} catch (IOException e) {
 			Log.v("PORT", "send method: IOException");
 			// TODO Auto-generated catch block

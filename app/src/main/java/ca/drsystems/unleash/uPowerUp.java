@@ -6,7 +6,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -21,16 +20,14 @@ public class uPowerUp {
     GoogleMap mMap;
     private Map<Integer, Marker> powerUpList;
     private Map<Integer, CircleOptions> powerUpListCircle;
-    LatLngBounds currScreen;
     Random rand;
     final int POWER_UP = 252;
 
-    public uPowerUp(Play PlayAct,GoogleMap map, Map<Integer, Marker> PowerUpList,Map<Integer, CircleOptions> PowerUpListCircle,LatLngBounds CurrScreen){
+    public uPowerUp(Play PlayAct,GoogleMap map, Map<Integer, Marker> PowerUpList,Map<Integer, CircleOptions> PowerUpListCircle){
         this.playAct = PlayAct;
         this.mMap = map;
         this.powerUpList = PowerUpList;
         this.powerUpListCircle = PowerUpListCircle;
-        this.currScreen = CurrScreen;
         rand = new Random();
     }
 
@@ -100,8 +97,8 @@ public class uPowerUp {
     private LatLng getRandomPoint(){
         LatLng rand_point = null;
 
-        LatLng ne = currScreen.northeast;
-        LatLng sw = currScreen.southwest;
+        LatLng ne = playAct.currScreen.northeast;
+        LatLng sw = playAct.currScreen.southwest;
 
         double upper_lat = sw.latitude;
         double lower_lat = ne.latitude;

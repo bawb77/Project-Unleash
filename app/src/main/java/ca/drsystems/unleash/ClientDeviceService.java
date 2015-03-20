@@ -131,7 +131,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                             if(tmp_stc.getReady())
                             {
                                 Log.v("PORT","Client Start Game");
-                                PlayAct.startGame(PlayAct.findViewById(R.id.readyFrag));
+                                PlayAct.startGame();
                             }
                         }
                     });

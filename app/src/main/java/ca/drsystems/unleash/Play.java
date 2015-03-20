@@ -97,7 +97,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     uPlayerTracking u_PlayerTracking;
     private MediaPlayer mPlayer;
     private SoundPool soundPool;
-    private int explosion_sound;
+    public int explosion_sound;
     private boolean sound_on;
     boolean deviceServiceStarted;
     boolean host;
@@ -128,7 +128,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         powerUpList = new HashMap<Integer, Marker>();
         powerUpListCircle = new HashMap<Integer, CircleOptions>();
         userPosition = new HashMap<Integer, Marker>();
-        explosion_sound = soundPool.load(this, R.raw.explosion, 1);
+
         rand = new Random();
         pCount = 0;
         powerLevel = 0;
@@ -145,9 +145,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         initializeIntents();
         createPeerListListener();
         setUpMapIfNeeded();
-        joinFragStart();
-        u_PowerUp = new uPowerUp(Play.this,mMap,powerUpList,powerUpListCircle,currScreen);
+        u_PowerUp = new uPowerUp(Play.this,mMap,powerUpList,powerUpListCircle);
         u_PlayerTracking = new uPlayerTracking(Play.this,mMap,userPosition);
+        joinFragStart();
+
 
     }
     public void joinFragStart() {
@@ -389,7 +390,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 LatLng temp3 = temp.southwest;
                 startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);
                 hostService.sendToAll(START_CONDITIONS, strCon);
-                startGame(v);
+                startGame();
                 u_PowerUp.startSpawn();
             }
             else
@@ -449,12 +450,18 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
 
-    public void startGame(View v)
+    public void startGame()
     {
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
         findViewById(R.id.readyFrag).setVisibility(View.INVISIBLE);
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
-        u_PlayerTracking.getUsersInformationThread();
+        new Thread(new Runnable()
+        {
+            public void run(){
+                u_PlayerTracking.getUsersInformationThread();
+            }
+        }).start();
+
     }
     public Circle addCircle(CircleOptions circle){
         if(host)
@@ -507,6 +514,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     public void removeCircle(Circle circle){
         circle.remove();
     }
+
     public Polyline addRect(PolylineOptions poly){
         Polyline polyline = mMap.addPolyline(poly);
         return polyline;
@@ -516,6 +524,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     {
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(in,0));
         currScreen = in;
+
     }
 
     public void startCount(boolean in)

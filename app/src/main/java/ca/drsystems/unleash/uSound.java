@@ -19,15 +19,16 @@ public class uSound {
         this.playAct = PlayAct;
         this.mPlayer = MPlayer;
         this.soundPool = SPool;
+
     }
     public void startSound(){
-
         Intent intent = playAct.getIntent();
         sound_on = intent.getBooleanExtra("sound_on", true);
         if(sound_on){
             setSoundtrackLoop();
         }
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        playAct.explosion_sound = soundPool.load(playAct, R.raw.explosion, 1);
     }
     private void setSoundtrackLoop(){
         mPlayer = MediaPlayer.create(playAct, R.raw.unleashgameplay);

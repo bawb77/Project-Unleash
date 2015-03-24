@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.util.HashMap;
+import ca.drsystems.unleash.Play.UserLocations;
 
 public class ClientService extends AsyncTask<Void, Void, String> {
 
@@ -42,6 +43,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     final int POWER_UP = 252;
     final int UNLEASH_C = 251;
     final int UNLEASH_D = 250;
+
 
 
     public ClientService(Handler handler, Play a, WifiP2pDevice d, int user_num, Socket c, OutputStream os, InputStream is){
@@ -90,7 +92,6 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             Log.v("SOCKC", "Client " + user.getNumber() + " Calling receive()");
             UnleashPackage p = receive();
 
-            if(p != null){
                 int header = p.getHeader();
                 switch (header)
                 {
@@ -108,7 +109,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                             @Override
                             public void run() {
                                 Log.v("SOCKC", "ClientService.java: Setting user: " + user.getNumber() + " into UserLocations with: " + user.getLat());
-                                Play.UserLocations.setUser(user);
+                                UserLocations.setUser(user);
                             }
                         });
                         break;
@@ -118,11 +119,12 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         PlayAct.startCount(tmp_stc.getReady());
                         break;
                     case USER_CLASS:
-                        tmp_user.setNumber(((User) p.getData()).getNumber());
+                        /*tmp_user.setNumber(((User) p.getData()).getNumber());
                         tmp_user.setLat(((User) p.getData()).getLat());
-                        tmp_user.setLon(((User) p.getData()).getLon());
-                        Play.UserLocations.setUser(tmp_user);
-                        Log.v("LOC", "Host Receiving user info: " + p.getData());
+                        tmp_user.setLon(((User) p.getData()).getLon());*/
+                        tmp_user = (User)p.getData();
+                        UserLocations.setUser(tmp_user);
+                        Log.v("LOC", "Host Receiving user info: " + p.getData() + " holder " + tmp_user);
                         break;
                     case POWER_UP:
                         tmp_power = (PowerUp)p.getData();
@@ -138,7 +140,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                     default :
                         break;
                 }
-            }
+
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -153,7 +155,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             handler.post(new Runnable(){
                 @Override
                 public void run(){
-                    userlist = Play.UserLocations.returnList();
+                    userlist = UserLocations.returnList();
                     Log.v("SOCKC", "Userlist: " + userlist);
 
                     for(User u : userlist.values()){

@@ -147,6 +147,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         setUpMapIfNeeded();
         u_PowerUp = new uPowerUp(Play.this,mMap,powerUpList,powerUpListCircle);
         u_PlayerTracking = new uPlayerTracking(Play.this,mMap,userPosition);
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setAllGesturesEnabled(false);
         joinFragStart();
 
 
@@ -386,6 +390,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             if(tCount == connected) {
                 Log.v("P2P", "SHOULD BE STARTING NOW FUCK");
                 LatLngBounds temp = mMap.getProjection().getVisibleRegion().latLngBounds;
+                currScreen = temp;
                 LatLng temp2 = temp.northeast;
                 LatLng temp3 = temp.southwest;
                 startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser(),temp2.latitude, temp2.longitude, temp3.latitude,temp3.longitude);

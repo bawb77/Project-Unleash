@@ -30,11 +30,10 @@ public class uPlayerTracking {
         {
             HashMap<Integer, User> users = Play.UserLocations.returnList();
             for(final User u : users.values()){
-                Log.v("ALC2", "user: " + u.getNumber() + " Loc: " + u.getLat());
-                if(u.getLat() != 0.0 && u.getAlive()){
-                    if(u.getNumber() != Play.UserLocations.getMyUser()){
-                        Log.v("ALC2", "create marker for user: " + u.getNumber());
-                        playAct.markopt = new MarkerOptions();
+                Log.v("ALC2", "user: " + u.getNumber() + " Loc: " + u.getLat() + " Alive: " + u.getAlive());
+                if(u.getLat() != 0.0 && u.getAlive()&& u.getNumber() != Play.UserLocations.getMyUser()){
+                    Log.v("ALC2", "create marker for user: " + u.getNumber());
+                    playAct.markopt = new MarkerOptions();
                         switch(u.getNumber())
                         {
                             case 0:
@@ -53,19 +52,15 @@ public class uPlayerTracking {
                                 playAct.markopt.position(new LatLng(u.getLat(), u.getLon())).title(u.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon3 ));
                                 break;
                         }
-                        Log.v("ALC2", "Marker created for: " + u.getNumber() + " at: " + u.getLat() + ", " + u.getLon());
+                    Log.v("ALC2", "Marker created for: " + u.getNumber() + " at: " + u.getLat() + ", " + u.getLon());
 
-                        playAct.handler.post(new Runnable(){
+                    playAct.handler.post(new Runnable(){
                             @Override
                             public void run() {
-                                // TODO Auto-generated method stub
-                                addUserMarker(playAct.markopt, u.getNumber());
-                            }
+                        addUserMarker(playAct.markopt, u.getNumber());
+                        }
                         });
                     }
-                } else{
-                    Log.v("ALC2", "marker not created: user " + u.getNumber() + "lat is 0.0!");
-                }
             }
 
             try {

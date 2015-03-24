@@ -146,14 +146,23 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                 case POWER_UP:
                     tmp_power = (PowerUp)p.getData();
                     if(tmp_power.status){
-                        PlayAct.u_PowerUp.removePowerUp(tmp_power.getPowerNum());
-                        if(tmp_power.getPlayer() == UserLocations.getMyUser())
-                        {
-                            PlayAct.u_PowerUp.increasePowerLevel();
-                        }
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                PlayAct.u_PowerUp.removePowerUp(tmp_power.getPowerNum());
+                                if (tmp_power.getPlayer() == UserLocations.getMyUser()) {
+                                    PlayAct.u_PowerUp.increasePowerLevel();
+                                }
+                            }
+                        });
                     }
                     else{
-                        PlayAct.u_PowerUp.makePowerUp(tmp_power.getPowerNum(),tmp_power.getLatLng());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                PlayAct.u_PowerUp.makePowerUp(tmp_power.getPowerNum(), tmp_power.getLatLng());
+                            }
+                        });
                     }
 
                     break;

@@ -21,7 +21,7 @@ public class User implements Serializable{
 
 
     public User(){
-
+        alive = true;
     }
     public boolean getAlive(){return this.alive;}
 
@@ -64,7 +64,7 @@ public class User implements Serializable{
     public String toString(){
         String ret = "";
 
-        ret += number + "###" + lat + "#" + lon;
+        ret += number + "###" + lat + "#" + lon + "#" + alive;
 
         return ret;
     }

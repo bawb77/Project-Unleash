@@ -119,4 +119,8 @@ public class UnleashMain extends ActionBarActivity {
         // TODO Auto-generated method stub
         super.onPause();
     }
+
+    public void tutorialClick(View v){
+        launchTutorial();
+    }
 }

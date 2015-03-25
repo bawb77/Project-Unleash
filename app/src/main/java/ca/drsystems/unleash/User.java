@@ -23,6 +23,13 @@ public class User implements Serializable{
     public User(){
         alive = true;
     }
+    public User(User u)
+    {
+        this.lat = u.getLat();
+        this.lon = u.getLon();
+        this.number = u.getNumber();
+        this.alive = u.getAlive();
+    }
     public boolean getAlive(){return this.alive;}
 
     public void setAlive(boolean in){this.alive = in;}

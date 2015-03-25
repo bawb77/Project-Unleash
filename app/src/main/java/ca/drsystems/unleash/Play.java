@@ -55,9 +55,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    public Score scoreFrag = new Score();
     public joinFrag jf = new joinFrag();
     FragmentManager fragmentManager = getSupportFragmentManager();
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
 
     private final IntentFilter intentFilter = new IntentFilter();
     private List<WifiP2pDevice> peersAvailable = new ArrayList();
@@ -131,7 +132,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         rand = new Random();
         pCount = 0;
-        powerLevel = 0;
+        powerLevel = 3;
         host = false;
         run = true;
         deviceServiceStarted = false;
@@ -155,7 +156,16 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
 
     }
+
+    private void scoreFragStart() {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.map, scoreFrag).commit();
+        TextView temp = (TextView)findViewById(R.id.tv_score);
+        temp.setText("Power: " + powerLevel);
+    }
+
     public void joinFragStart() {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.map, jf).commit();
     }
 
@@ -466,6 +476,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 u_PlayerTracking.getUsersInformationThread();
             }
         }).start();
+        scoreFragStart();
 
     }
     public Circle addCircle(CircleOptions circle){
@@ -527,7 +538,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void startingMapCoor(LatLngBounds in)
     {
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(in,0));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(in, 0));
         currScreen = in;
 
     }

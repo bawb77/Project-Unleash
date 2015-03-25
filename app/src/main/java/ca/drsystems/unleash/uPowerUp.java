@@ -1,6 +1,7 @@
 package ca.drsystems.unleash;
 
 import android.os.Handler;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -86,12 +87,14 @@ public class uPowerUp {
     }
 
     public void increasePowerLevel(){
-        // TextView power = (TextView)findViewById(R.id.tv_score);
+        TextView power = (TextView)playAct.findViewById(R.id.tv_score);
         playAct.powerLevel++;
-        // power.setText("Power: " + powerLevel);
+        power.setText("Power: " + playAct.powerLevel);
     }
     public void decreasePowerLevel(){
+        TextView power = (TextView)playAct.findViewById(R.id.tv_score);
         playAct.powerLevel = 0;
+        power.setText("Power: " + playAct.powerLevel);
     }
 
     private LatLng getRandomPoint(){

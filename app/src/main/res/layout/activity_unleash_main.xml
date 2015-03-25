@@ -42,4 +42,17 @@
         android:layout_centerHorizontal="true"
         android:background="@android:color/transparent"
         android:textColor="#ffe3f5ff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tutorial"
+        android:id="@+id/button"
+        android:background="@android:color/transparent"
+        android:textColor="#ffe3f5ff"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/soundToggle"
+        android:layout_alignStart="@+id/soundToggle"
+        android:layout_marginBottom="55dp"
+        android:onClick="tutorialClick" />
 </RelativeLayout>

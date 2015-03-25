@@ -260,7 +260,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 				if(ois.available() == 0){
 					Object o;
 					o = ois.readObject();
-
+                    Log.v("OK", "" + o);
 					UnleashPackage p = (UnleashPackage)o;
                     Log.v("PORT", "Object received from ois: " + p.getHeader() +  " data " + p.getData());
 					return p;
@@ -284,11 +284,12 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
 	
 	public void send(int header, Object o){
 		UnleashPackage p = new UnleashPackage(header, o);
+        Log.v("OK", "Object o's toString(): " + o);
 		
 		try {
 			Log.v("PORT", "Sending my packet: " + header + " With data: " + p.getData());
 			oos.writeObject(p);
-			Log.v("PORT", "Sent my packet: " + header);
+			Log.v("PORT", "Sent my packet: " + header + " With data: " + p.getData());
 		} catch (IOException e) {
 			Log.v("PORT", "send method: IOException");
 			// TODO Auto-generated catch block

@@ -4,6 +4,33 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="ca.drsystems.unleash.Tutorial">
+    tools:context="ca.drsystems.unleash.Tutorial"
+    android:background="@drawable/background2">
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:weightSum="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Tutorial"
+            android:id="@+id/tutorialTitle"
+            android:layout_gravity="center_horizontal"
+            android:textSize="48dp"
+            android:textColor="#ffe3f5ff" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Welcome to Unleash! \n\nSo you want to kill your friends? Well, you&apos;ve come to the right place. In just a couple minutes you&apos;ll be on the Unleash battlefield!\n\nFirst though, here&apos;s how to play.\n\n1) Connect to your friends! Be sure everyone has WiFi Direct enabled on their device.\n\n2) Collect the power-ups! Race your friends to the power ups so you can be the first to attack.\n\n3) Unleash! Run close to your friends and hit the Unleash button."
+            android:id="@+id/tutorialText"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="0.70"
+            android:textColor="#ffe3f5ff" />
+    </LinearLayout>
 </RelativeLayout>

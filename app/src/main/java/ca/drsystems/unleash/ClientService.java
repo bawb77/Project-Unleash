@@ -122,8 +122,13 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         /*tmp_user.setNumber(((User) p.getData()).getNumber());
                         tmp_user.setLat(((User) p.getData()).getLat());
                         tmp_user.setLon(((User) p.getData()).getLon());*/
-                        tmp_user = (User)p.getData();
-                        UserLocations.setUser(tmp_user);
+                        tmp_user = new User((User) p.getData());
+                        handler.post(new Runnable() {
+                             @Override
+                             public void run() {
+                                 UserLocations.setUser(tmp_user);
+                             }
+                         });
                         Log.v("LOC", "Host Receiving user info: " + p.getData() + " holder " + tmp_user);
                         break;
                     case POWER_UP:
@@ -159,13 +164,9 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                     Log.v("SOCKC", "Userlist: " + userlist);
 
                     for(User u : userlist.values()){
-                        tmp_user = new User();
-                        tmp_user.setLat(u.getLat());
-                        tmp_user.setLon(u.getLon());
-                        tmp_user.setName(u.getName());
-                        tmp_user.setNumber(u.getNumber());
-                        send(USER_CLASS, tmp_user);
-                        Log.v("SOCKC", "User " + u.getNumber() + "'s info sent with info: " + tmp_user.getLat());
+                        User temp = new User(u);
+                        send(USER_CLASS, temp);
+                        Log.v("SOCKC", "User " + u.getNumber() + "'s info sent with info: " + temp.getLat());
                     }
                 }
             });
@@ -223,7 +224,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
             if(ois.available() == 0){
                 Object o;
                 o = ois.readObject();
-
+                Log.v("OK", "Object o's toString(): " + o);
                 UnleashPackage p = (UnleashPackage)o;
                 Log.v("SOCKC", "Client " + user.getNumber() + " Received object" + p.getHeader() + " with data " + p.getData());
 

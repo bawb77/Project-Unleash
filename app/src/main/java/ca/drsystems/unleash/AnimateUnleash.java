@@ -2,6 +2,7 @@ package ca.drsystems.unleash;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -25,7 +26,8 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     Integer pic_num;
     boolean explosion_cir;
 
-    public AnimateUnleash(Play PlayAct, LatLng location, Play act, int power, boolean circle_expl) {
+    public AnimateUnleash(Play PlayAct, LatLng location, int power, boolean circle_expl) {
+        Log.v("AU", "AnimateUnleash");
         this.playAct = PlayAct;
         this.location = location;
         playAct.circles = new ArrayList<Circle>();

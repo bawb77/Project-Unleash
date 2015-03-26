@@ -99,9 +99,7 @@ public class UnleashMain extends ActionBarActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean("firstLaunch", false);
         if(!previouslyStarted){
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putBoolean("firstLaunch", Boolean.TRUE);
-            edit.commit();
+
             launchTutorial();
         }
     }

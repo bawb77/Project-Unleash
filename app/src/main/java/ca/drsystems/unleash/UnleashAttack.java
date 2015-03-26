@@ -2,10 +2,12 @@ package ca.drsystems.unleash;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
+
 /**
  * Created by BBaxter3160 on 2/16/2015.
  */
-public class UnleashAttack {
+public class UnleashAttack implements Serializable{
     private int player, powerLvl;
     long time;
     public double lat,lon;

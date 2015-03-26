@@ -1,10 +1,12 @@
 package ca.drsystems.unleash;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -16,6 +18,7 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -77,7 +80,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
             .setInterval(500);
     GoogleApiClient myGoogleApiClient;
-
+    WifiManager mWifiManager;
     final HashMap<String, String> buddies = new HashMap<String, String>();
     HostService hostService;
     Channel mChannel;
@@ -113,6 +116,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     final int POWER_UP = 252;
     final int UNLEASH_C = 251;
     final int UNLEASH_D = 250;
+    final int END_GAME = 249;
 
 
     @Override
@@ -129,7 +133,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         powerUpList = new HashMap<Integer, Marker>();
         powerUpListCircle = new HashMap<Integer, CircleOptions>();
         userPosition = new HashMap<Integer, Marker>();
-
+        mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         rand = new Random();
         pCount = 0;
         powerLevel = 3;
@@ -153,15 +157,13 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setAllGesturesEnabled(false);
         joinFragStart();
-
-
     }
 
     private void scoreFragStart() {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.map, scoreFrag).commit();
+
         TextView temp = (TextView)findViewById(R.id.tv_score);
-        temp.setText("Power: " + powerLevel);
     }
 
     public void joinFragStart() {
@@ -218,6 +220,17 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device1.deviceAddress;
         config.wps.setup = WpsInfo.PBC;
+        Random rand = new Random();
+        Log.v("DEVICE", "Model: " + Build.MODEL + ", DEVICE: " + Build.DEVICE);
+
+
+        if(Build.MODEL.equals("Nexus 7")){
+            config.groupOwnerIntent = 15;
+            Log.v("DEVICE", "YAY I AM A NEXUS 7");
+        }
+        else
+            config.groupOwnerIntent = rand.nextInt(14);
+
         mManager.connect(mChannel, config, new ActionListener() {
 
             @Override
@@ -423,9 +436,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
 
     public void unleash(View v){
+        Log.v("UNLEASH", "UNLEASHING " + host + ", " + powerLevel);
         if(powerLevel >= 3){
             if(host)
             {
+                Log.v("UNLEASH", "Host Unleashing");
                 Context context = getApplicationContext();
                 CharSequence text = "UNLEASH";
                 int duration = Toast.LENGTH_SHORT;
@@ -454,8 +469,9 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     private void showUnleashAnimation(){
 
         LatLng temp = new LatLng(userLocation.getLatitude(),userLocation.getLongitude());
-        new AnimateUnleash(Play.this,temp, this, powerLevel, true).execute();
-        soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
+        Log.v("UNL", "Unleashing at " + userLocation.getLatitude() + ", " + userLocation.getLongitude());
+        new AnimateUnleash(Play.this, temp, powerLevel, true).execute();
+        //soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
     }
 
 
@@ -480,8 +496,10 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     }
     public Circle addCircle(CircleOptions circle){
+        Log.v("CIRCLE", "ADDING CIRCLE");
         if(host)
         {
+            Log.v("CIRCLE", "I AM A HOST ADDING CIRCLE");
             HashMap<Integer, User> killUsers = UserLocations.returnList();
             for(User u : killUsers.values())
             {
@@ -500,17 +518,28 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     }
     private void checkVictory()
     {
+        Log.v("VICTORY", "CHECKING VICTORY");
         HashMap<Integer, User> countUsers = UserLocations.returnList();
         int aliveCount =0;
+        String winner = "";
         for(User u : countUsers.values())
         {
+
             if(u.getAlive())
             {
                 aliveCount++;
+                winner += u.getName();
             }
         }
+        aliveCount = 1;
+        Log.v("VICTORY", "winner: " + winner);
         if(aliveCount == 1)
         {
+            Intent intent = new Intent(this, GameOver.class);
+            intent.putExtra("winner", winner);
+            startActivity(intent);
+            EndGame finished = new EndGame(true,winner);
+            hostService.sendToAll(END_GAME, finished);
             //end game screen call goes here
         }
     }

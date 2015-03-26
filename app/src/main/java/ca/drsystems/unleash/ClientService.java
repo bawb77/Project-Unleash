@@ -123,6 +123,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         tmp_user.setLat(((User) p.getData()).getLat());
                         tmp_user.setLon(((User) p.getData()).getLon());*/
                         tmp_user = new User((User) p.getData());
+
                         handler.post(new Runnable() {
                              @Override
                              public void run() {
@@ -139,7 +140,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         break;
                     case UNLEASH_C:
                         tmp_unleash_c = (UnleashAttack)p.getData();
-                        new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(), PlayAct,tmp_unleash_c.getPowerLvl(), true).execute();
+                        new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(),tmp_unleash_c.getPowerLvl(), true).execute();
                         PlayAct.hostService.sendToAll(UNLEASH_C,tmp_unleash_c);
                         break;
                     default :
@@ -222,12 +223,13 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     public UnleashPackage receive(){
         try {
             if(ois.available() == 0){
+                //UnleashPackage temp = (UnleashPackage)ois.readObject();
                 Object o;
                 o = ois.readObject();
                 Log.v("OK", "Object o's toString(): " + o);
                 UnleashPackage p = (UnleashPackage)o;
                 Log.v("SOCKC", "Client " + user.getNumber() + " Received object" + p.getHeader() + " with data " + p.getData());
-
+                Log.v("TEST", "Does object equal casted object? " + o.equals(p));
                 return p;
             }
         } catch (ClassNotFoundException e) {

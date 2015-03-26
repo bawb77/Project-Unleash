@@ -1,9 +1,11 @@
 package ca.drsystems.unleash;
 
+import java.io.Serializable;
+
 /**
  * Created by BBaxter3160 on 2/16/2015.
  */
-public class UnleashAttackDirect {
+public class UnleashAttackDirect implements Serializable{
     private int player, powerLvl;
     long time;
     public double lat1,lon1,lat2,lon2;

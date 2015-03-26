@@ -22,6 +22,9 @@ public class User implements Serializable{
 
     public User(){
         alive = true;
+        this.lat = 1.0;
+        this.lon = 1.0;
+        this.number = 255;
     }
     public User(User u)
     {

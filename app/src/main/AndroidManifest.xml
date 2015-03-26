@@ -57,7 +57,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ca.drsystems.unleash.UnleashMain" />
         </activity>
-
+        <activity
+            android:name=".GameOver"
+            android:label="@string/title_activity_game_over" >
+        </activity>
+        <activity
+            android:name=".SetName"
+            android:label="@string/title_activity_set_name" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package ca.drsystems.unleash;
 
+import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -36,6 +37,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
     final int POWER_UP = 252;
     final int UNLEASH_C = 251;
     final int UNLEASH_D = 250;
+    final int END_GAME = 249;
 	private User tmp_user;
     private PowerUp tmp_power;
     private startCondition tmp_stc;
@@ -171,7 +173,13 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     break;
                 case UNLEASH_C:
                     tmp_unleash_c = (UnleashAttack)p.getData();
-                    new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(), PlayAct,tmp_unleash_c.getPowerLvl(), true).execute();
+                    new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(),tmp_unleash_c.getPowerLvl(), true).execute();
+                    break;
+                case END_GAME:
+                    EndGame temp = (EndGame)p.getData();
+                    Intent intent = new Intent(PlayAct, GameOver.class);
+                    intent.putExtra("winner", temp.getPlayer());
+                    PlayAct.startActivity(intent);
                     break;
                 default:
                     break;
@@ -263,6 +271,7 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                     Log.v("OK", "" + o);
 					UnleashPackage p = (UnleashPackage)o;
                     Log.v("PORT", "Object received from ois: " + p.getHeader() +  " data " + p.getData());
+                    Log.v("TEST", "Does object equal casted object? " + o.equals(p));
 					return p;
 				}
 			} catch (ClassNotFoundException e) {

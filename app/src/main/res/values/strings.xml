@@ -30,5 +30,7 @@
     <string name="tv_score">Power: </string>
     <string name="title_activity_tutorial">Tutorial</string>
     <string name="title_activity_join">Join</string>
+    <string name="title_activity_game_over">GameOver</string>
+    <string name="title_activity_set_name">SetName</string>
 
 </resources>

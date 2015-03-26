@@ -406,7 +406,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void letsPlay(boolean readyTemp, ToggleButton r, View v) {
 
-        if(host)
+        if(host && deviceServiceStarted)
         {
             Log.d("P2P", "***********************HOST SENDS STRCON********************");
             Log.v("P2p", "Counts" + tCount + ":" + connected);
@@ -426,11 +426,14 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 r.setChecked(false);
             }
         }
-        else if(!host)
+        else if(!host && deviceServiceStarted)
         {
             Log.d("P2P", "***********************Client SENDS STRCON********************");
             startCondition strCon = new startCondition(readyTemp, UserLocations.getMyUser());
             clientDeviceService.send(START_CONDITIONS, strCon);
+        }
+        else{
+            r.setChecked(false);
         }
 
     }
@@ -471,6 +474,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         LatLng temp = new LatLng(userLocation.getLatitude(),userLocation.getLongitude());
         Log.v("UNL", "Unleashing at " + userLocation.getLatitude() + ", " + userLocation.getLongitude());
         new AnimateUnleash(Play.this, temp, powerLevel, true).execute();
+        //hostService.explosions(temp);
         //soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
     }
 
@@ -583,11 +587,11 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
     public void toggleButton(View v)
     {
-        ToggleButton r = (ToggleButton)v;
-        if(r.isChecked())
-            letsPlay(true, r, v);
-        else if (!r.isChecked())
-            letsPlay(false, r, v);
+            ToggleButton r = (ToggleButton)v;
+            if(r.isChecked())
+                letsPlay(true, r, v);
+            else if (!r.isChecked())
+                letsPlay(false, r, v);
     }
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {

@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -91,6 +93,10 @@ public class HostService extends AsyncTask<Void, Void, String>{
     {
         static List<PowerUp> storedPowerUpList = new LinkedList<>();
     }
+    /*public void explosions(LatLng in)
+    {
+        new AnimateUnleash(PlayAct, in, PlayAct.powerLevel, true).execute();
+    }*/
 
 	@Override
 	protected String doInBackground(Void... params) {

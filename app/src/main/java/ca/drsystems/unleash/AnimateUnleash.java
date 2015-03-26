@@ -41,6 +41,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
         super.onPreExecute();
     }
     private void createCircle(int meters, int color){
+        Log.v("CIRCLE", "createCircle()");
         circle = new CircleOptions();
         circle.center(new LatLng(location.latitude, location.longitude));
         circle.radius(meters);
@@ -82,6 +83,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
+        Log.v("CIRCLE", "doInBackground");
         if(explosion_cir){
             try {
                 createCircle(meters, Color.RED);

@@ -1,9 +1,11 @@
 package ca.drsystems.unleash;
 
+import java.io.Serializable;
+
 /**
  * Created by SRoddick3160 on 3/25/2015.
  */
-public class EndGame {
+public class EndGame implements Serializable{
     private boolean gameState;
     private String player;
 

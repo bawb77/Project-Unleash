@@ -174,6 +174,13 @@ public class ClientDeviceService extends AsyncTask<Void, Void, String>{
                 case UNLEASH_C:
                     tmp_unleash_c = (UnleashAttack)p.getData();
                     new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(),tmp_unleash_c.getPowerLvl(), true).execute();
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            Log.v("ASYNC", "DO IN BACKGROUND OK");
+                            return null;
+                        }
+                    }.execute(null, null, null);
                     break;
                 case END_GAME:
                     EndGame temp = (EndGame)p.getData();

@@ -101,17 +101,12 @@ public class ClientService extends AsyncTask<Void, Void, String> {
 
                         Log.v("SOCKC", "ClientService.java: Received UnleashPackage with user number = " + u.getNumber() + " and lat: " + u.getLat());
 
-                        //this.user.setName(u.getName());
+                        this.user.setName(u.getName());
                         this.user.setLat(u.getLat());
                         this.user.setLon(u.getLon());
 
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.v("SOCKC", "ClientService.java: Setting user: " + user.getNumber() + " into UserLocations with: " + user.getLat());
-                                UserLocations.setUser(user);
-                            }
-                        });
+                        Log.v("SOCKC", "ClientService.java: Setting user: " + user.getNumber() + " into UserLocations with: " + user.getLat());
+                        UserLocations.setUser(user);
                         break;
                     case START_CONDITIONS:
                         tmp_stc = (startCondition) p.getData();
@@ -119,17 +114,9 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         PlayAct.startCount(tmp_stc.getReady());
                         break;
                     case USER_CLASS:
-                        /*tmp_user.setNumber(((User) p.getData()).getNumber());
-                        tmp_user.setLat(((User) p.getData()).getLat());
-                        tmp_user.setLon(((User) p.getData()).getLon());*/
-                        tmp_user = new User((User) p.getData());
+                        tmp_user = (User)p.getData();
 
-                        handler.post(new Runnable() {
-                             @Override
-                             public void run() {
-                                 UserLocations.setUser(tmp_user);
-                             }
-                         });
+                        UserLocations.setUser(tmp_user);
                         Log.v("LOC", "Host Receiving user info: " + p.getData() + " holder " + tmp_user);
                         break;
                     case POWER_UP:
@@ -140,7 +127,7 @@ public class ClientService extends AsyncTask<Void, Void, String> {
                         break;
                     case UNLEASH_C:
                         tmp_unleash_c = (UnleashAttack)p.getData();
-                        new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(),tmp_unleash_c.getPowerLvl(), true).execute();
+                        new AnimateUnleash(PlayAct,tmp_unleash_c.getLocation(),tmp_unleash_c.getPowerLvl(), true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         PlayAct.hostService.sendToAll(UNLEASH_C,tmp_unleash_c);
                         break;
                     default :

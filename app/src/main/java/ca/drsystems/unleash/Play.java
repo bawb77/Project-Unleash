@@ -18,6 +18,7 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -262,28 +263,28 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     public void createGroupLogic() {
         Log.v("P2P", "CreateGroupLogic");
         mManager.requestConnectionInfo(mChannel,
-                new WifiP2pManager.ConnectionInfoListener() {
+            new WifiP2pManager.ConnectionInfoListener() {
 
-                    @Override
-                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                        if (info.groupFormed) {
-                            if (info.isGroupOwner && !deviceServiceStarted) {
-                                startHostService();
-                            } else if (!deviceServiceStarted) {
-                                startClientDeviceService(info);
-                            }
-                        }
-                        else{
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    createGroupLogic();
-                                }
-                            }, 1000);
+                @Override
+                public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                    if (info.groupFormed) {
+                        if (info.isGroupOwner && !deviceServiceStarted) {
+                            startHostService();
+                        } else if (!deviceServiceStarted) {
+                            startClientDeviceService(info);
                         }
                     }
-                });
+                    else{
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                createGroupLogic();
+                            }
+                        }, 1000);
+                    }
+                }
+            });
     }
 
 
@@ -473,7 +474,14 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
 
         LatLng temp = new LatLng(userLocation.getLatitude(),userLocation.getLongitude());
         Log.v("UNL", "Unleashing at " + userLocation.getLatitude() + ", " + userLocation.getLongitude());
-        new AnimateUnleash(Play.this, temp, powerLevel, true).execute();
+        new AnimateUnleash(Play.this, temp, powerLevel, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Log.v("ASYNC", "DO IN BACKGROUND OK");
+                return null;
+            }
+        }.execute(null, null, null);
         //hostService.explosions(temp);
         //soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
     }
@@ -535,16 +543,14 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
                 winner += u.getName();
             }
         }
-        aliveCount = 1;
         Log.v("VICTORY", "winner: " + winner);
         if(aliveCount == 1)
         {
+            EndGame finished = new EndGame(true,winner);
+            hostService.sendToAll(END_GAME, finished);
             Intent intent = new Intent(this, GameOver.class);
             intent.putExtra("winner", winner);
             startActivity(intent);
-            EndGame finished = new EndGame(true,winner);
-            hostService.sendToAll(END_GAME, finished);
-            //end game screen call goes here
         }
     }
 

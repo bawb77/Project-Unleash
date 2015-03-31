@@ -210,7 +210,6 @@ public class ClientService extends AsyncTask<Void, Void, String> {
     public UnleashPackage receive(){
         try {
             if(ois.available() == 0){
-                //UnleashPackage temp = (UnleashPackage)ois.readObject();
                 Object o;
                 o = ois.readObject();
                 Log.v("OK", "Object o's toString(): " + o);

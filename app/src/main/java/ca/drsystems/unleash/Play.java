@@ -137,7 +137,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         rand = new Random();
         pCount = 0;
-        powerLevel = 3;
+        powerLevel = 0;
         host = false;
         run = true;
         deviceServiceStarted = false;
@@ -192,19 +192,22 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         peerListListener = new WifiP2pManager.PeerListListener() {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peerList) {
+                if(findViewById(R.id.readyFrag).getVisibility() == View.VISIBLE) {
+                    Log.v("P2P", "onPeersAvailable() call");
+                    // Out with the old, in with the new.
 
-                Log.v("P2P", "onPeersAvailable() call");
-                // Out with the old, in with the new.
-                peersAvailable.clear();
-                peersAvailable.addAll(peerList.getDeviceList());
+                    peersAvailable.clear();
+                    peersAvailable.addAll(peerList.getDeviceList());
 
-                Log.v("P2P", "peerList: " + peerList);
-                numPlayer = (TextView) findViewById(R.id.numPlayers);
-                numPlayer.setText("" + peersAvailable.size());
-                for(WifiP2pDevice device : peersAvailable)
-                {
-                    if(!deviceServiceStarted || deviceServiceStarted && host)
-                        connect(device);
+                    Log.v("P2P", "peerList: " + peerList);
+
+                    numPlayer = (TextView) findViewById(R.id.numPlayers);
+                    numPlayer.setText("" + peersAvailable.size());
+
+                    for (WifiP2pDevice device : peersAvailable) {
+                        if (!deviceServiceStarted || deviceServiceStarted && host)
+                            connect(device);
+                    }
                 }
             }
         };
@@ -245,14 +248,22 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
             public void onFailure(int reason) {
                 Log.v("P2P", "Connection to: " + device1.deviceName +
                         " initiation failed: " + reason);
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(device1.status != 1)
-                            connect(device1);
-                    }
-                }, 1000);
+
+                if(reason == 2){
+                    peersAvailable.clear();
+                    peerListListener = null;
+                    createPeerListListener();
+                }
+                else{
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(device1.status != 1)
+                                connect(device1);
+                        }
+                    }, 1000);
+                }
             }
         });
 
@@ -496,6 +507,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
     public void startGame()
     {
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
+        findViewById(R.id.readyFrag).
         findViewById(R.id.readyFrag).setVisibility(View.INVISIBLE);
         Log.v("OK", "##########VISIBILITY: " + findViewById(R.id.readyFrag).getVisibility());
         new Thread(new Runnable()
@@ -710,7 +722,7 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         Location location = LocationServices.FusedLocationApi.getLastLocation(myGoogleApiClient);
         Log.v("P2P", "location " + location);
         LatLng temp = new LatLng(location.getLatitude(),location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(temp,19));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(temp, 19));
     }
 
     @Override

@@ -62,7 +62,8 @@ public class uPowerUp {
     {
         if(u.getAlive())
         {
-            for(Integer id : powerUpListCircle.keySet()) {
+            final Map<Integer, CircleOptions> temp = powerUpListCircle;
+            for(Integer id : temp.keySet()) {
                 PowerUp pTemp = new PowerUp(id, Play.UserLocations.getMyUser(),true);
                 if (playAct.IsLocationInCircle(u.getLatLng(), powerUpListCircle.get(id))) {
                     if (playAct.host){
@@ -75,7 +76,6 @@ public class uPowerUp {
                 }
             }
         }
-
     }
 
     public void removePowerUp(int id)

@@ -228,12 +228,8 @@ public class Play extends FragmentActivity implements WifiP2pManager.ConnectionI
         Log.v("DEVICE", "Model: " + Build.MODEL + ", DEVICE: " + Build.DEVICE);
 
 
-        if(Build.MODEL.equals("Nexus 7")){
-            config.groupOwnerIntent = 15;
-            Log.v("DEVICE", "YAY I AM A NEXUS 7");
-        }
-        else
-            config.groupOwnerIntent = rand.nextInt(14);
+        config.groupOwnerIntent = 15;
+        config.groupOwnerIntent = rand.nextInt(14);
 
         mManager.connect(mChannel, config, new ActionListener() {
 

@@ -121,4 +121,14 @@ public class UnleashMain extends ActionBarActivity {
     public void tutorialClick(View v){
         launchTutorial();
     }
+
+    public void bugReport(View v){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("plain/text");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "directedrealitysystems@gmail.com" });
+        intent.putExtra(Intent.EXTRA_SUBJECT, "BUG REPORT - UNLEASH");
+        intent.putExtra(Intent.EXTRA_TEXT, "While playing Unleashed I encountered the following bug: " +
+                "\n\n\n\n\nAnd this is what I was doing when it happened:");
+        startActivity(Intent.createChooser(intent, "Send mail..."));
+    }
 }

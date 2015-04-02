@@ -50,9 +50,19 @@
         android:id="@+id/button"
         android:background="@android:color/transparent"
         android:textColor="#ffe3f5ff"
+        android:onClick="tutorialClick"
+        android:layout_below="@+id/soundToggle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Report Bugs"
+        android:id="@+id/bugReport"
+        android:textColor="#ffe3f5ff"
+        android:background="@android:color/transparent"
         android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/soundToggle"
-        android:layout_alignStart="@+id/soundToggle"
-        android:layout_marginBottom="55dp"
-        android:onClick="tutorialClick" />
+        android:layout_centerHorizontal="true"
+        android:onClick="bugReport" />
 </RelativeLayout>

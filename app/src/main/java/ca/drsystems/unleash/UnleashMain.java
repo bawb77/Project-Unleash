@@ -14,7 +14,7 @@ import android.widget.ToggleButton;
 
 import java.io.IOException;
 
-
+//Start Screen and main menu
 public class UnleashMain extends ActionBarActivity {
     ToggleButton sound;
     MediaPlayer mPlayer;
@@ -48,15 +48,11 @@ public class UnleashMain extends ActionBarActivity {
         try {
             mPlayer.prepare();
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         mPlayer.setLooping(true);
-
         mPlayer.start();
     }
 
@@ -90,12 +86,12 @@ public class UnleashMain extends ActionBarActivity {
     }
     @Override
     protected void onResume() {
-        if(sound.isChecked()){
+        if(sound.isChecked()&& !mPlayer.isPlaying()){
             mPlayer.start();
         }
-        // TODO Auto-generated method stub
         super.onResume();
 
+        //first launch logic for tutorial screen
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean("firstLaunch", false);
         if(!previouslyStarted){
@@ -114,14 +110,13 @@ public class UnleashMain extends ActionBarActivity {
         if(sound.isChecked()){
             mPlayer.pause();
         }
-        // TODO Auto-generated method stub
         super.onPause();
     }
-
+    //Tutorial Button
     public void tutorialClick(View v){
         launchTutorial();
     }
-
+    //bug reporting
     public void bugReport(View v){
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("plain/text");

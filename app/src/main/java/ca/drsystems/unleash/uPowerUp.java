@@ -13,17 +13,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Map;
 import java.util.Random;
 
-/**
- * Created by BBaxter3160 on 3/16/2015.
- */
+//these are methods pulled out of PLAY to reduce it's size
 public class uPowerUp {
-    Play playAct;
-    GoogleMap mMap;
+    public Play playAct;
+    public GoogleMap mMap;
     private Map<Integer, Marker> powerUpList;
     private Map<Integer, CircleOptions> powerUpListCircle;
-    Random rand;
-    final int POWER_UP = 252;
-
+    private Random rand;
+    private final int POWER_UP = 252;
+    //Constructor
     public uPowerUp(Play PlayAct,GoogleMap map, Map<Integer, Marker> PowerUpList,Map<Integer, CircleOptions> PowerUpListCircle){
         this.playAct = PlayAct;
         this.mMap = map;
@@ -31,7 +29,7 @@ public class uPowerUp {
         this.powerUpListCircle = PowerUpListCircle;
         rand = new Random();
     }
-
+    //start the power ups spawning on a 10 second timer at random points within the boundaries of the map
     public void startSpawn()
     {
         Handler handler = new Handler();
@@ -47,6 +45,7 @@ public class uPowerUp {
             }
         }, 10000);
     }
+    //create the power up marker to be displayed on the map
     public int makePowerUp(int marker_id, LatLng in)
     {
         Marker test = mMap.addMarker(new MarkerOptions()
@@ -58,17 +57,22 @@ public class uPowerUp {
         powerUpListCircle.put(marker_id, GetMarkerBounds(test));
         return marker_id;
     }
+    //check to see if player is within the surrounding area of a power up marker and send a power up object to the host if true.
     public void checkLocation(User u)
     {
+        //make sure player is still in the game
         if(u.getAlive())
         {
             final Map<Integer, CircleOptions> temp = powerUpListCircle;
+            //check all power ups to see if player is close to any of them
             for(Integer id : temp.keySet()) {
                 PowerUp pTemp = new PowerUp(id, Play.UserLocations.getMyUser(),true);
                 if (playAct.IsLocationInCircle(u.getLatLng(), powerUpListCircle.get(id))) {
+                    //host logic
                     if (playAct.host){
                         increasePowerLevel();
                         playAct.hostService.sendToAll(id, pTemp);}
+                    //client logic
                     else {
                         playAct.clientDeviceService.send(POWER_UP, pTemp);
                         removePowerUp(id);
@@ -77,7 +81,7 @@ public class uPowerUp {
             }
         }
     }
-
+    //remove a power up after the host has assigned to power to a player
     public void removePowerUp(int id)
     {
         Marker rem_marker = powerUpList.get(id);
@@ -85,18 +89,19 @@ public class uPowerUp {
         powerUpListCircle.remove(id);
         rem_marker.remove();
     }
-
+    //increase players power level
     public void increasePowerLevel(){
         TextView power = (TextView)playAct.findViewById(R.id.tv_score);
         playAct.powerLevel++;
         power.setText("Power: " + playAct.powerLevel);
     }
+    //decrease a players power level after they unleash
     public void decreasePowerLevel(){
         TextView power = (TextView)playAct.findViewById(R.id.tv_score);
         playAct.powerLevel = 0;
         power.setText("Power: " + playAct.powerLevel);
     }
-
+    //generate a random point within the current play field to place a power up marker at
     private LatLng getRandomPoint(){
         LatLng rand_point = null;
 
@@ -115,6 +120,7 @@ public class uPowerUp {
 
         return rand_point;
     }
+    // generate a circle around each marker 0.00003 across that is the zone for a player to pick up
     private CircleOptions GetMarkerBounds(Marker marker){
         double meters = 0.00003;
 

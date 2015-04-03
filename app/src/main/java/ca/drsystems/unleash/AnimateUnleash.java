@@ -12,9 +12,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 
-/**
- * Created by BBaxter3160 on 3/16/2015.
- */
 public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     LatLng location;
     Play playAct;
@@ -25,7 +22,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     Integer meters;
     Integer pic_num;
     boolean explosion_cir;
-
+    //Constructor recieves call from ClientDeviceService or Play
     public AnimateUnleash(Play PlayAct, LatLng location, int power, boolean circle_expl) {
         Log.v("AU", "AnimateUnleash");
         this.playAct = PlayAct;
@@ -40,6 +37,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
     }
+    //create a circle based on location of player at time of unleash call
     private void createCircle(int meters, int color){
         Log.v("CIRCLE", "createCircle()");
         circle = new CircleOptions();
@@ -47,7 +45,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
         circle.radius(meters);
         circle.fillColor(color);
         circle.strokeColor(0x00000000);
-
+        //add circle to main thread
         playAct.handler.post(new Runnable() {
             @Override
             public void run() {
@@ -55,6 +53,7 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
             }
         });
     }
+    //create rectangle for directional unleash method that is not implemented in this build
     private void createRect(){
         double lat = location.latitude;
         double lon = location.longitude;
@@ -84,25 +83,26 @@ public class AnimateUnleash extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         Log.v("CIRCLE", "doInBackground");
+        //check for type of unleash
         if(explosion_cir){
             try {
                 createCircle(meters, Color.RED);
-                //createCircle(2, Color.RED);
+                //create multiple circles that expand their diameter while removing earlier circles to give explosion effect.
                 Thread.sleep(500);
                 int col = Color.argb(130, 255, 00, 00);
                 createCircle(meters+2, col);
-                //createCircle(4, col);
+
                 Thread.sleep(500);
                 col = Color.argb(50, 255, 00, 00);
                 createCircle(meters+4, col);
-                //createCircle(6, col);
+
                 Thread.sleep(500);
 
                 int length = playAct.circles.size();
-
+                //removing circles
                 for(int i = length - 1; i >= 0; i--){
                     rem_circle = playAct.circles.get(i);
-
+                    //call to main thread
                     playAct.handler.post(new Runnable() {
                         @Override
                         public void run() {

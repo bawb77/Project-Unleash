@@ -5,9 +5,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.io.Serializable;
 
-/**
- * Created by BBaxter3160 on 2/16/2015.
- */
+//created by the host to send out starting area for map
+//created by the client to signal readiness
 public class startCondition implements Serializable {
     private static final long serialVersionUID = 43L;
     private boolean ready;
@@ -16,7 +15,7 @@ public class startCondition implements Serializable {
     private final double EMPTY = 0.0;
 
     final int id = 254;
-
+    //Constructor for the Host
     public startCondition(boolean ready, int number, double xur,double yur,double xll,double yll)
     {
         this.ready = ready;
@@ -26,6 +25,7 @@ public class startCondition implements Serializable {
         this.yur = yur;
         this.yll = yll;
     }
+    //Constructor for the Client
     public startCondition(boolean ready, int number)
     {
         this.ready = ready;

@@ -4,17 +4,16 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
-/**
- * Created by BBaxter3160 on 2/16/2015.
- */
 public class PowerUp implements Serializable {
     private static final long serialVersionUID = 43L;
     private double lat, lon;
-    long time;
+    private long time;
     private int powerNum, player;
-    boolean status;
-    final int id = 252;
-
+    private boolean status;
+    private final int id = 252;
+    //constructor, This Object is used to pass power up locations for both creation and destruction.
+    //based on the status variable the device either creates a new power upo a the LATLNG or destroys and existing one.
+    //the Player stored in the Object when the Status is to destroy the power up receives the increase in power level.
     public PowerUp(double lat, double lon, int powerNum, int player, boolean status)
     {
         this.lat = lat;
@@ -41,6 +40,7 @@ public class PowerUp implements Serializable {
     {
         return powerNum;
     }
+    public boolean getStatus(){return this.status;}
     public int getPlayer()
     {
         return player;

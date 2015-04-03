@@ -7,20 +7,19 @@ import android.media.SoundPool;
 
 import java.io.IOException;
 
-/**
- * Created by BBaxter3160 on 3/16/2015.
- */
+//sound methods from PLAY removed to help with length
 public class uSound {
-    Play playAct;
-    MediaPlayer mPlayer;
-    boolean sound_on;
-    SoundPool soundPool;
+    public Play playAct;
+    public MediaPlayer mPlayer;
+    public boolean sound_on;
+    public SoundPool soundPool;
+    protected int explosion_sound;
     public uSound(Play PlayAct,MediaPlayer MPlayer, SoundPool SPool){
         this.playAct = PlayAct;
         this.mPlayer = MPlayer;
         this.soundPool = SPool;
-
     }
+    //start music playing if sound was toggled on
     public void startSound(){
         Intent intent = playAct.getIntent();
         sound_on = intent.getBooleanExtra("sound_on", true);
@@ -28,8 +27,13 @@ public class uSound {
             setSoundtrackLoop();
         }
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        playAct.explosion_sound = soundPool.load(playAct, R.raw.explosion, 1);
+        explosion_sound = soundPool.load(playAct, R.raw.explosion, 1);
     }
+    public void explosions()
+    {
+        soundPool.play(explosion_sound, 1.0f, 1.0f, 0, 0, 1.0f);
+    }
+    //set up soundtrack looping
     private void setSoundtrackLoop(){
         mPlayer = MediaPlayer.create(playAct, R.raw.unleashgameplay);
         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);

@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-
+//Java class for Win Screen Layout
 public class GameOver extends ActionBarActivity {
 
     TextView winnerName;
@@ -16,7 +16,7 @@ public class GameOver extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_over);
-
+        //display the winning players name on the kill screen
         winnerName = (TextView)findViewById(R.id.winnerName);
         Intent intent = new Intent();
         winnerName.setText(intent.getStringExtra("winner"));

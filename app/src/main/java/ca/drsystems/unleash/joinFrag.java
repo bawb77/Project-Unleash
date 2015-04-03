@@ -6,9 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * Created by BBaxter3160 on 1/31/2015.
- */
+//Create Join Fragment at the beginning while the devices are connected and host has not started the game yet
 public class joinFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

@@ -2,14 +2,13 @@ package ca.drsystems.unleash;
 
 import java.io.Serializable;
 
-/**
- * Created by BBaxter3160 on 2/16/2015.
- */
+//Object for passing Directed Unleash attacks
+//TBI
 public class UnleashAttackDirect implements Serializable{
     private int player, powerLvl;
-    long time;
-    public double lat1,lon1,lat2,lon2;
-    final int id = 250;
+    private long time;
+    private double lat1,lon1,lat2,lon2;
+    private final int id = 250;
     public UnleashAttackDirect(int player, int powerLvl, double lat1, double lon1, double lat2, double lon2)
     {
         this.player = player;

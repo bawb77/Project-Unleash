@@ -12,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-
+//Tutorial Class for inflating the tutorial Layout on the first time the app is activated after install
+//Tutorial is also available for review on the main page.
+//Pop-up makes users create their game player name after install.
 public class Tutorial extends ActionBarActivity {
 
     @Override
@@ -20,8 +22,10 @@ public class Tutorial extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tutorial);
 
+        //pull and pre-existing settings from shared prefs.
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean("firstLaunch", false);
+        //if game has not been previously played or was just reinstalled get a player name for this device.
         if(!previouslyStarted){
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean("firstLaunch", Boolean.TRUE);

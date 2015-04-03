@@ -4,16 +4,13 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
-/**
- * Created by BBaxter3160 on 2/16/2015.
- */
+//Object for passing Circular unleash attacks
 public class UnleashAttack implements Serializable{
     private int player, powerLvl;
-    long time;
-    public double lat,lon;
-
-    final int id = 251;
-
+    private long time;
+    private double lat,lon;
+    private final int id = 251;
+    //constructor
     public UnleashAttack(int player, int powerLvl, double lat, double lon)
     {
         this.player = player;
